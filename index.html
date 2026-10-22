@@ -1,0 +1,691 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Artikelarchiv</title>
+<style>
+  /* Layout: schmale Lesespalte, Artikel als Blatt, Aktionsleiste fest am unteren Rand.
+     Gelb ist die einzige Signalfarbe, weil es die Farbe des Textmarkers ist. */
+  :root {
+    --bg: #EEF1F4;
+    --paper: #FFFFFF;
+    --ink: #1B2430;
+    --muted: #5A6676;
+    --line: #D5DBE2;
+    --accent: #1D5C78;
+    --accent-ink: #FFFFFF;
+    --chip: #E3E8ED;
+    --hl: rgba(255, 222, 64, 0.62);
+    --ok: #1E7A4C;
+    --warn: #9A5B00;
+    --bad: #B3261E;
+    --font-ui: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --font-read: "Source Serif 4", Georgia, "Times New Roman", serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #11161C;
+      --paper: #1A212A;
+      --ink: #E7EBF0;
+      --muted: #9AA6B4;
+      --line: #2B3541;
+      --accent: #6BB6D6;
+      --accent-ink: #0E1A22;
+      --chip: #232C37;
+      --hl: rgba(255, 206, 40, 0.34);
+      --ok: #5CCB96;
+      --warn: #E3B05B;
+      --bad: #FF8A80;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #11161C;
+    --paper: #1A212A;
+    --ink: #E7EBF0;
+    --muted: #9AA6B4;
+    --line: #2B3541;
+    --accent: #6BB6D6;
+    --accent-ink: #0E1A22;
+    --chip: #232C37;
+    --hl: rgba(255, 206, 40, 0.34);
+    --ok: #5CCB96;
+    --warn: #E3B05B;
+    --bad: #FF8A80;
+    color-scheme: dark;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-ui);
+    font-size: 15px;
+    line-height: 1.5;
+  }
+  .wrap {
+    max-width: 680px;
+    margin: 0 auto;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 20px 104px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  h1, h2, h3, p, ul { margin: 0; }
+  .kicker {
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  h1 {
+    font-size: 26px;
+    line-height: 1.2;
+    font-weight: 600;
+    text-wrap: balance;
+  }
+  .top { display: flex; flex-direction: column; gap: 8px; }
+  .checks { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+  .chip {
+    font-size: 12.5px;
+    background: var(--chip);
+    border-radius: 999px;
+    padding: 3px 10px;
+    color: var(--ink);
+  }
+  .chip.ok::before { content: "\2713\00a0"; color: var(--ok); font-weight: 600; }
+  .chip.warn::before { content: "!\00a0"; color: var(--warn); font-weight: 600; }
+  .chip.bad::before { content: "\2717\00a0"; color: var(--bad); font-weight: 600; }
+
+  .paper {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 20px 18px 8px;
+  }
+  .paper .meta { font-size: 12.5px; color: var(--muted); }
+  .paper h2 {
+    font-family: var(--font-read);
+    font-size: 24px;
+    line-height: 1.25;
+    font-weight: 600;
+    margin: 6px 0 14px;
+    text-wrap: balance;
+  }
+  .prose {
+    font-family: var(--font-read);
+    font-size: 18px;
+    line-height: 1.65;
+    overflow-wrap: anywhere;
+  }
+  .prose p { margin: 0 0 1em; }
+  ::highlight(markierung) { background-color: var(--hl); }
+  mark.hl { background: var(--hl); color: inherit; border-radius: 2px; }
+
+  h3 { font-size: 16px; font-weight: 600; }
+  .section { display: flex; flex-direction: column; gap: 10px; }
+  .hint { color: var(--muted); font-size: 14px; }
+  input[type="search"] {
+    font: inherit;
+    color: var(--ink);
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 9px 12px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  ul.list { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .item {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+  }
+  .quote {
+    font-family: var(--font-read);
+    font-size: 16px;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    background: linear-gradient(var(--hl), var(--hl)) no-repeat 0 100% / 100% 0.45em;
+  }
+  .item-foot { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
+  .how { font-size: 12.5px; color: var(--muted); }
+  .how.lost { color: var(--bad); }
+  .actions { display: flex; gap: 8px; }
+
+  button {
+    font: inherit;
+    font-weight: 500;
+    color: var(--ink);
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 8px 14px;
+    min-height: 40px;
+    cursor: pointer;
+  }
+  button:disabled { opacity: 0.45; cursor: default; }
+  button.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-ink);
+  }
+  button.confirm { border-color: var(--bad); color: var(--bad); }
+  button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  .bar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 5;
+    background: var(--paper);
+    border-top: 1px solid var(--line);
+    padding-top: 10px;
+    padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .bar .label { font-size: 14px; color: var(--muted); min-width: 0; }
+  .bar .label.done { color: var(--ok); font-weight: 600; }
+  .bar button { flex: none; min-width: 120px; }
+
+  :root {
+    color-scheme: light;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  body { margin: 0; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <p class="kicker">Test der Markier-Funktion</p>
+    <h1>Markier-Prototyp</h1>
+    <div class="checks" id="checks" aria-live="polite"></div>
+  </header>
+
+  <article class="paper">
+    <p class="meta">Beispieltext, gespeichert wird nur auf diesem Gerät</p>
+    <h2>Was von einer Markierung bleibt</h2>
+    <div class="prose" id="article"></div>
+  </article>
+
+  <section class="section">
+    <h3>Markierungen <span id="count"></span></h3>
+    <input type="search" id="q" placeholder="In Markierungen suchen" autocomplete="off">
+    <ul class="list" id="list"></ul>
+    <p class="hint" id="empty">Noch keine Markierung. Wähle oben einen Text aus und tippe unten auf «Markieren».</p>
+  </section>
+
+  <section class="section">
+    <h3>Belastungstest</h3>
+    <p class="hint">Verändert den Artikeltext so, wie es eine Redaktion nachträglich tun könnte: ein Absatz vorn eingefügt, ein Wort ersetzt, ein doppeltes Leerzeichen. Danach müssen deine Markierungen an ihrer Stelle bleiben. In der Liste siehst du bei jeder, wie sie wiedergefunden wurde.</p>
+    <div class="row">
+      <button id="variant">Artikeltext verändern</button>
+      <button id="wipe">Alle Markierungen löschen</button>
+    </div>
+    <p class="hint" id="variantState"></p>
+  </section>
+</div>
+
+<div class="bar" id="bar">
+  <span class="label" id="sel" aria-live="polite">Text auswählen, dann markieren</span>
+  <button class="primary" id="mark" disabled>Markieren</button>
+</div>
+
+<script>
+// Anker-Logik: Markierungen im Text speichern und wiederfinden.
+// Verfahren nach dem W3C Web Annotation Data Model:
+// exakter Wortlaut + Text davor/danach (Quote) + Position (Offsets).
+const Anchor = (function () {
+  const CONTEXT = 32;
+
+  function trimRange(text, s, e) {
+    while (s < e && /\s/.test(text[s])) s++;
+    while (e > s && /\s/.test(text[e - 1])) e--;
+    return [s, e];
+  }
+
+  function makeSelector(text, start, end) {
+    return {
+      start: start,
+      end: end,
+      exact: text.slice(start, end),
+      prefix: text.slice(Math.max(0, start - CONTEXT), start),
+      suffix: text.slice(end, end + CONTEXT)
+    };
+  }
+
+  function commonSuffix(a, b) {
+    let n = 0;
+    while (n < a.length && n < b.length && a[a.length - 1 - n] === b[b.length - 1 - n]) n++;
+    return n;
+  }
+
+  function commonPrefix(a, b) {
+    let n = 0;
+    while (n < a.length && n < b.length && a[n] === b[n]) n++;
+    return n;
+  }
+
+  function allIndices(text, needle) {
+    const out = [];
+    if (!needle) return out;
+    let i = text.indexOf(needle);
+    while (i !== -1) {
+      out.push(i);
+      i = text.indexOf(needle, i + 1);
+    }
+    return out;
+  }
+
+  // 0..1: wie gut passt die Umgebung an Position i zur gespeicherten Umgebung
+  function contextScore(text, h, i) {
+    const pre = text.slice(Math.max(0, i - h.prefix.length), i);
+    const suf = text.slice(i + h.exact.length, i + h.exact.length + h.suffix.length);
+    const total = h.prefix.length + h.suffix.length;
+    if (total === 0) return 1;
+    return (commonSuffix(h.prefix, pre) + commonPrefix(h.suffix, suf)) / total;
+  }
+
+  function normalize(text) {
+    let out = '';
+    const map = [];
+    let prevSpace = false;
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i];
+      if (/\s/.test(c)) {
+        if (!prevSpace) {
+          out += ' ';
+          map.push(i);
+          prevSpace = true;
+        }
+      } else {
+        out += c;
+        map.push(i);
+        prevSpace = false;
+      }
+    }
+    return { out: out, map: map };
+  }
+
+  function closest(list, target) {
+    let best = list[0];
+    for (const v of list) if (Math.abs(v - target) < Math.abs(best - target)) best = v;
+    return best;
+  }
+
+  // Liefert {start, end, how} oder null, wenn die Stelle nicht mehr auffindbar ist.
+  function anchor(text, h) {
+    // 1) Position stimmt noch und die Umgebung passt
+    if (text.slice(h.start, h.end) === h.exact && contextScore(text, h, h.start) >= 0.5) {
+      return { start: h.start, end: h.end, how: 'Position' };
+    }
+
+    // 2) Wortlaut suchen, bei Mehrfachtreffern die Umgebung entscheiden lassen
+    const idx = allIndices(text, h.exact);
+    if (idx.length === 1) {
+      return { start: idx[0], end: idx[0] + h.exact.length, how: 'Wortlaut' };
+    }
+    if (idx.length > 1) {
+      let best = idx[0];
+      let bestScore = -1;
+      for (const i of idx) {
+        const sc = contextScore(text, h, i);
+        const better = sc > bestScore || (sc === bestScore && Math.abs(i - h.start) < Math.abs(best - h.start));
+        if (better) {
+          best = i;
+          bestScore = sc;
+        }
+      }
+      return { start: best, end: best + h.exact.length, how: 'Wortlaut + Umgebung' };
+    }
+
+    // 3) Wortlaut mit angepasstem Leerraum
+    const nt = normalize(text);
+    const nh = normalize(h.exact).out;
+    const nIdx = allIndices(nt.out, nh);
+    if (nIdx.length) {
+      const origStarts = nIdx.map(i => nt.map[i]);
+      const s = closest(origStarts, h.start);
+      const ni = nIdx[origStarts.indexOf(s)];
+      const e = nt.map[ni + nh.length - 1] + 1;
+      return { start: s, end: e, how: 'Wortlaut (Leerraum angepasst)' };
+    }
+
+    // 4) Unscharf: Anfang und Ende der Markierung einzeln suchen
+    const k = Math.min(24, Math.floor(h.exact.length / 2));
+    if (k >= 10) {
+      const head = h.exact.slice(0, k);
+      const tail = h.exact.slice(-k);
+      const heads = allIndices(text, head);
+      const tails = allIndices(text, tail);
+      let best = null;
+      for (const hi of heads) {
+        for (const ti of tails) {
+          const end = ti + k;
+          const len = end - hi;
+          if (end <= hi) continue;
+          if (len < h.exact.length * 0.5 || len > h.exact.length * 1.6) continue;
+          const cost = Math.abs(len - h.exact.length) + Math.abs(hi - h.start) / 1000;
+          if (!best || cost < best.cost) best = { start: hi, end: end, cost: cost };
+        }
+      }
+      if (best) return { start: best.start, end: best.end, how: 'Anfang + Ende (unscharf)' };
+    }
+
+    return null;
+  }
+
+  return { makeSelector: makeSelector, trimRange: trimRange, anchor: anchor };
+})();
+
+if (typeof module !== 'undefined') module.exports = Anchor;
+
+
+(function () {
+  'use strict';
+
+  var KEY = 'markier-proto-v1';
+  var BASE = [
+    'Wer Artikel liest, markiert. Auf Papier genügt ein Textmarker, am Bildschirm braucht es mehr: Die Markierung muss einen Neustart überleben, sie muss sich suchen lassen, und sie sollte auch dann noch stimmen, wenn der Artikel später leicht verändert wird.',
+    'Eine Markierung ist nur so gut wie ihr Wiederfinden. Speichert eine App nur die Position im Text, verrutscht alles, sobald vorne ein Satz eingefügt wird. Speichert sie nur den markierten Wortlaut, wird es bei Wiederholungen mehrdeutig.',
+    'Deshalb merkt sich ein robustes Verfahren drei Dinge: den markierten Text selbst, ein paar Zeichen davor und danach sowie die ursprüngliche Position. Beim Wiederöffnen wird zuerst die Position geprüft, dann der Wortlaut mit seiner Umgebung.',
+    'Zeitungsartikel ändern sich ohnehin. Eine Zeile wird korrigiert, eine Zwischenüberschrift ergänzt, ein Absatz gestrafft. Eine Markierung ist nur so gut wie ihr Wiederfinden, und das gilt umso mehr, wenn der Text nicht mehr derselbe ist wie am Tag des Speicherns.',
+    'Für die Praxis heisst das: Wer Artikel lokal auf dem Smartphone archiviert, speichert den bereinigten Text einmal und markiert darin. Der Artikel selbst bleibt dann unverändert, und die Markierungen verlieren ihren Halt nur, wenn die App den Text später neu aufbereitet.',
+    'Probier es aus: Halte einen Satz gedrückt, ziehe die Auswahl auf und tippe unten auf «Markieren». Lade die Seite danach neu und prüfe, ob alles noch an seinem Platz ist.'
+  ];
+
+  function paragraphs(variant) {
+    var p = BASE.slice();
+    if (variant) {
+      p[2] = p[2].replace('ein paar Zeichen', 'einige Zeichen');
+      p[4] = p[4].replace('Der Artikel selbst', 'Der  Artikel selbst');
+      p.unshift('Nachtrag der Redaktion: Dieser Text wurde am Tag nach der Veröffentlichung ergänzt und um einen Absatz erweitert.');
+    }
+    return p;
+  }
+
+  var root = document.getElementById('article');
+  var markBtn = document.getElementById('mark');
+  var selLabel = document.getElementById('sel');
+  var bar = document.getElementById('bar');
+
+  var storageOk = true;
+  try {
+    localStorage.setItem('__t', '1');
+    localStorage.removeItem('__t');
+  } catch (e) {
+    storageOk = false;
+  }
+
+  var state = { variant: false, items: [] };
+  function load() {
+    if (!storageOk) return;
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (raw) {
+        var d = JSON.parse(raw);
+        if (d && Array.isArray(d.items)) state = { variant: !!d.variant, items: d.items };
+      }
+    } catch (e) { /* leerer Start */ }
+  }
+  function save() {
+    if (!storageOk) return;
+    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { storageOk = false; }
+  }
+
+  var hasApi = typeof CSS !== 'undefined' && CSS.highlights && typeof Highlight !== 'undefined';
+  var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function esc(s) {
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function textOffset(node, offset) {
+    var r = document.createRange();
+    r.selectNodeContents(root);
+    r.setEnd(node, offset);
+    return r.toString().length;
+  }
+
+  function rangeAt(s, e) {
+    var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    var pos = 0, startNode, startOff, endNode, endOff, n;
+    while ((n = walker.nextNode())) {
+      var len = n.nodeValue.length;
+      if (startNode === undefined && s < pos + len) { startNode = n; startOff = s - pos; }
+      if (startNode !== undefined && e <= pos + len) { endNode = n; endOff = e - pos; break; }
+      pos += len;
+    }
+    if (!startNode || !endNode) return null;
+    var r = document.createRange();
+    r.setStart(startNode, startOff);
+    r.setEnd(endNode, endOff);
+    return r;
+  }
+
+  function wrapRange(range) {
+    var scope = range.commonAncestorContainer;
+    if (scope.nodeType === 3) scope = scope.parentNode;
+    var w = document.createTreeWalker(scope, NodeFilter.SHOW_TEXT);
+    var nodes = [], n;
+    while ((n = w.nextNode())) if (range.intersectsNode(n)) nodes.push(n);
+    nodes.forEach(function (node) {
+      var r = document.createRange();
+      r.selectNodeContents(node);
+      if (node === range.startContainer) r.setStart(node, range.startOffset);
+      if (node === range.endContainer) r.setEnd(node, range.endOffset);
+      if (r.collapsed) return;
+      var m = document.createElement('mark');
+      m.className = 'hl';
+      r.surroundContents(m);
+    });
+  }
+
+  function paint(found) {
+    if (hasApi) {
+      CSS.highlights.delete('markierung');
+      if (!found.length) return;
+      var hl = new Highlight();
+      found.forEach(function (f) {
+        var r = rangeAt(f.a.start, f.a.end);
+        if (r) hl.add(r);
+      });
+      CSS.highlights.set('markierung', hl);
+    } else {
+      found.forEach(function (f) {
+        var r = rangeAt(f.a.start, f.a.end);
+        if (r) wrapRange(r);
+      });
+    }
+  }
+
+  var resolved = [];
+  function render() {
+    root.innerHTML = paragraphs(state.variant).map(function (p) { return '<p>' + esc(p) + '</p>'; }).join('\n');
+    var text = root.textContent;
+    resolved = state.items.map(function (h) { return { h: h, a: Anchor.anchor(text, h) }; });
+    paint(resolved.filter(function (x) { return x.a; }));
+    renderList();
+    renderChecks();
+    renderVariant();
+  }
+
+  function chip(cls, label) {
+    return '<span class="chip ' + cls + '">' + esc(label) + '</span>';
+  }
+  function renderChecks() {
+    var found = resolved.filter(function (x) { return x.a; }).length;
+    var html = '';
+    html += hasApi ? chip('ok', 'Highlight-API vorhanden') : chip('warn', 'Ersatzdarstellung aktiv');
+    html += storageOk ? chip('ok', 'Speicher lokal') : chip('bad', 'Speicher nicht verfügbar');
+    html += resolved.length ? chip(found === resolved.length ? 'ok' : 'warn', found + ' von ' + resolved.length + ' Markierungen gefunden') : '';
+    document.getElementById('checks').innerHTML = html;
+  }
+
+  function twoStep(btn, idleLabel, action) {
+    var timer = null;
+    btn.addEventListener('click', function () {
+      if (timer) {
+        clearTimeout(timer);
+        timer = null;
+        btn.textContent = idleLabel;
+        btn.classList.remove('confirm');
+        action();
+      } else {
+        btn.textContent = 'Sicher? Nochmal tippen';
+        btn.classList.add('confirm');
+        timer = setTimeout(function () {
+          timer = null;
+          btn.textContent = idleLabel;
+          btn.classList.remove('confirm');
+        }, 3000);
+      }
+    });
+  }
+
+  function renderList() {
+    var q = document.getElementById('q').value.trim().toLowerCase();
+    var ul = document.getElementById('list');
+    ul.innerHTML = '';
+    var shown = resolved.filter(function (x) { return !q || x.h.exact.toLowerCase().indexOf(q) !== -1; });
+    document.getElementById('count').textContent = resolved.length ? '(' + resolved.length + ')' : '';
+    var empty = document.getElementById('empty');
+    empty.hidden = shown.length > 0;
+    empty.textContent = resolved.length
+      ? 'Keine Markierung enthält diesen Suchbegriff.'
+      : 'Noch keine Markierung. Wähle oben einen Text aus und tippe unten auf «Markieren».';
+    shown.forEach(function (x) {
+      var li = document.createElement('li');
+      li.className = 'item';
+      li.innerHTML =
+        '<div class="quote">' + esc(x.h.exact) + '</div>' +
+        '<div class="item-foot"><span class="how' + (x.a ? '' : ' lost') + '">' +
+        (x.a ? 'Gefunden über: ' + esc(x.a.how) : 'Im Text nicht mehr auffindbar') +
+        '</span><span class="actions"><button data-act="show"' + (x.a ? '' : ' disabled') + '>Zeigen</button>' +
+        '<button data-act="del">Löschen</button></span></div>';
+      li.querySelector('[data-act="show"]').addEventListener('click', function () {
+        var r = x.a && rangeAt(x.a.start, x.a.end);
+        if (!r) return;
+        var top = r.getBoundingClientRect().top + window.scrollY - 140;
+        window.scrollTo({ top: Math.max(0, top), behavior: reduce ? 'auto' : 'smooth' });
+      });
+      var del = li.querySelector('[data-act="del"]');
+      twoStep(del, 'Löschen', function () {
+        state.items = state.items.filter(function (h) { return h.id !== x.h.id; });
+        save();
+        render();
+      });
+      ul.appendChild(li);
+    });
+  }
+
+  function renderVariant() {
+    document.getElementById('variant').textContent = state.variant ? 'Originaltext wiederherstellen' : 'Artikeltext verändern';
+    document.getElementById('variantState').textContent = state.variant
+      ? 'Aktuell: veränderter Text (Absatz vorn eingefügt, ein Wort ersetzt, doppeltes Leerzeichen).'
+      : 'Aktuell: Originaltext.';
+  }
+
+  /* Auswahl */
+  var pending = null;
+  var barTouched = false;
+  var doneTimer = null;
+
+  function setPending(p) {
+    pending = p;
+    markBtn.disabled = !p;
+    if (doneTimer) return;
+    selLabel.className = 'label';
+    selLabel.textContent = p ? (p.e - p.s) + ' Zeichen ausgewählt' : 'Text auswählen, dann markieren';
+  }
+
+  document.addEventListener('selectionchange', function () {
+    var sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0 || sel.isCollapsed) {
+      if (!barTouched) setPending(null);
+      return;
+    }
+    var r = sel.getRangeAt(0);
+    if (!root.contains(r.commonAncestorContainer)) {
+      if (!barTouched) setPending(null);
+      return;
+    }
+    var text = root.textContent;
+    var se = Anchor.trimRange(text, textOffset(r.startContainer, r.startOffset), textOffset(r.endContainer, r.endOffset));
+    if (se[1] - se[0] < 2) {
+      if (!barTouched) setPending(null);
+      return;
+    }
+    setPending({ s: se[0], e: se[1] });
+  });
+
+  function touch() {
+    barTouched = true;
+    setTimeout(function () { barTouched = false; }, 700);
+  }
+  bar.addEventListener('pointerdown', function (e) { touch(); e.preventDefault(); });
+  bar.addEventListener('mousedown', function (e) { e.preventDefault(); });
+
+  markBtn.addEventListener('click', function () {
+    if (!pending) return;
+    var text = root.textContent;
+    var sel = Anchor.makeSelector(text, pending.s, pending.e);
+    var dup = state.items.some(function (h) { return h.start === sel.start && h.end === sel.end && h.exact === sel.exact; });
+    if (!dup) {
+      sel.id = 'h' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+      sel.created = Date.now();
+      state.items.push(sel);
+      save();
+    }
+    var s = window.getSelection();
+    if (s) s.removeAllRanges();
+    pending = null;
+    markBtn.disabled = true;
+    render();
+    selLabel.className = 'label done';
+    selLabel.textContent = dup ? 'Schon markiert' : 'Markiert';
+    if (doneTimer) clearTimeout(doneTimer);
+    doneTimer = setTimeout(function () {
+      doneTimer = null;
+      setPending(pending);
+    }, 1600);
+  });
+
+  document.getElementById('q').addEventListener('input', renderList);
+  document.getElementById('variant').addEventListener('click', function () {
+    state.variant = !state.variant;
+    save();
+    render();
+  });
+  twoStep(document.getElementById('wipe'), 'Alle Markierungen löschen', function () {
+    state.items = [];
+    save();
+    render();
+  });
+
+  load();
+  render();
+})();
+</script>
+</body>
+</html>
