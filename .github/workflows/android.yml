@@ -1,12 +1,54 @@
 name: APK bauen
 
+# Dieser Workflow kann zwei Dinge:
+#  - apk-bauen: baut die APK (läuft auch automatisch bei jeder Änderung auf main)
+#  - schluessel-erzeugen: erzeugt EINMALIG den Signaturschlüssel. Ein zweiter Lauf erzeugt einen ANDEREN Schlüssel.
+
 on:
   workflow_dispatch:
+    inputs:
+      aktion:
+        description: 'Was soll passieren?'
+        type: choice
+        default: apk-bauen
+        options:
+          - apk-bauen
+          - schluessel-erzeugen
   push:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
+  schluessel:
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.aktion == 'schluessel-erzeugen'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Schlüssel erzeugen
+        run: |
+          keytool -genkeypair \
+            -keystore debug.keystore \
+            -storepass android -keypass android \
+            -alias androiddebugkey \
+            -keyalg RSA -keysize 2048 -validity 10000 \
+            -dname "CN=Artikelarchiv, O=Privat, C=CH"
+          base64 -w0 debug.keystore > schluessel.txt
+
+      - name: Schlüssel bereitstellen (1 Tag verfügbar)
+        uses: actions/upload-artifact@v7
+        with:
+          name: schluessel
+          path: schluessel.txt
+          retention-days: 1
+
   apk:
+    if: github.event_name == 'push' || github.event.inputs.aktion == 'apk-bauen'
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
@@ -33,9 +75,32 @@ jobs:
           npx cap add android
           npx cap sync android
 
+      - name: Festen Signaturschlüssel einsetzen
+        env:
+          KEYSTORE_B64: ${{ secrets.KEYSTORE_B64 }}
+        run: |
+          if [ -z "$KEYSTORE_B64" ]; then
+            echo "::error::Das Secret KEYSTORE_B64 fehlt. Siehe Anleitung zum Signaturschlüssel."
+            exit 1
+          fi
+          mkdir -p ~/.android
+          echo "$KEYSTORE_B64" | base64 -d > ~/.android/debug.keystore
+
       - name: Debug-APK bauen
         working-directory: android
         run: ./gradlew assembleDebug
+
+      - name: Signatur der APK prüfen
+        run: |
+          APKSIGNER="$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)/apksigner"
+          KS_FP=$(keytool -list -v -keystore ~/.android/debug.keystore -storepass android | grep -m1 'SHA256:' | sed 's/.*SHA256: *//' | tr -d ':' | tr 'A-Z' 'a-z')
+          APK_FP=$("$APKSIGNER" verify --print-certs android/app/build/outputs/apk/debug/app-debug.apk | grep -m1 'SHA-256 digest' | sed 's/.*: *//' | tr -d ' ' | tr 'A-Z' 'a-z')
+          echo "Fingerabdruck des Schlüssels: $KS_FP"
+          echo "Fingerabdruck der APK:        $APK_FP"
+          if [ -z "$KS_FP" ] || [ "$KS_FP" != "$APK_FP" ]; then
+            echo "::error::Die APK ist nicht mit dem festen Schlüssel signiert."
+            exit 1
+          fi
 
       - name: APK bereitstellen
         uses: actions/upload-artifact@v7
