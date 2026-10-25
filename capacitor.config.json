@@ -1,5 +1,10 @@
 {
   "appId": "ch.privat.artikelarchiv",
   "appName": "Artikelarchiv",
-  "webDir": "www"
+  "webDir": "www",
+  "plugins": {
+    "CapacitorHttp": {
+      "enabled": true
+    }
+  }
 }
