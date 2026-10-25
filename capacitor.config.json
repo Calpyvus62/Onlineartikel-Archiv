@@ -1,0 +1,10 @@
+{
+  "appId": "ch.privat.artikelarchiv",
+  "appName": "Yves’ Onlineartikel Archiv",
+  "webDir": "www",
+  "plugins": {
+    "CapacitorHttp": {
+      "enabled": true
+    }
+  }
+}
