@@ -1,0 +1,3225 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Yves’ Onlineartikel Archiv</title>
+<style>
+:root {
+  color-scheme: light dark;
+  --bg: #EEF1F4;
+  --paper: #FFFFFF;
+  --ink: #1B2430;
+  --muted: #5A6676;
+  --line: #D5DBE2;
+  --accent: #1D5C78;
+  --accent-ink: #FFFFFF;
+  --chip: #E3E8ED;
+  --hl: rgba(255, 222, 64, 0.62);
+  --ok: #1E7A4C;
+  --warn: #9A5B00;
+  --bad: #B3261E;
+  --font-ui: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-read: "Noto Serif", Georgia, "Times New Roman", serif;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #11161C;
+    --paper: #1A212A;
+    --ink: #E7EBF0;
+    --muted: #9AA6B4;
+    --line: #2B3541;
+    --accent: #6BB6D6;
+    --accent-ink: #0E1A22;
+    --chip: #232C37;
+    --hl: rgba(255, 206, 40, 0.34);
+    --ok: #5CCB96;
+    --warn: #E3B05B;
+    --bad: #FF8A80;
+  }
+}
+[hidden] { display: none !important; }
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+}
+.wrap {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 16px max(16px, env(safe-area-inset-left, 0px)) 112px max(16px, env(safe-area-inset-right, 0px));
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+h1, h2, h3, p, ul { margin: 0; }
+h1 { font-size: 24px; line-height: 1.2; font-weight: 600; }
+h1 .count, h3 span { color: var(--muted); font-weight: 400; font-size: 0.7em; }
+h3 { font-size: 16px; font-weight: 600; }
+.top-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.kicker { font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.hint { color: var(--muted); font-size: 14px; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; }
+.add { display: flex; flex-direction: column; gap: 10px; }
+
+input[type="text"], input[type="search"] {
+  font: inherit;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 11px 12px;
+  width: 100%;
+}
+button {
+  font: inherit;
+  font-weight: 500;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 8px 14px;
+  min-height: 42px;
+  cursor: pointer;
+}
+button.small { min-height: 36px; padding: 4px 12px; font-size: 14px; }
+button:disabled { opacity: 0.45; cursor: default; }
+button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+button.confirm { border-color: var(--bad); color: var(--bad); }
+button:focus-visible, input:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.status {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-left-width: 4px;
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+.status.busy { border-left-color: var(--accent); }
+.status.ok { border-left-color: var(--ok); }
+.status.warn { border-left-color: var(--warn); }
+.status.bad { border-left-color: var(--bad); }
+
+.articles { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.card {
+  width: 100%;
+  text-align: left;
+  display: flex; flex-direction: column; gap: 4px;
+  padding: 12px 14px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font-weight: 400;
+}
+.card-meta { font-size: 12.5px; color: var(--muted); }
+.card-title { font-family: var(--font-read); font-size: 18px; line-height: 1.3; font-weight: 600; overflow-wrap: anywhere; }
+.card-excerpt {
+  font-size: 14px; color: var(--muted);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.card-chips { font-size: 12.5px; color: var(--accent); }
+
+.reader-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.orig { font-size: 14px; color: var(--accent); }
+.paper {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 18px 16px 8px;
+}
+.paper .meta { font-size: 12.5px; color: var(--muted); overflow-wrap: anywhere; }
+.paper h2 {
+  font-family: var(--font-read);
+  font-size: 24px; line-height: 1.25; font-weight: 600;
+  margin: 6px 0 14px;
+  overflow-wrap: anywhere;
+}
+.prose {
+  font-family: var(--font-read);
+  font-size: 18px; line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+.prose p { margin: 0 0 1em; }
+.prose h1, .prose h2, .prose h3, .prose h4 { font-family: var(--font-ui); line-height: 1.25; margin: 1.4em 0 0.5em; }
+.prose h1 { font-size: 1.35em; } .prose h2 { font-size: 1.25em; } .prose h3, .prose h4 { font-size: 1.1em; }
+.prose img { max-width: 100%; height: auto; display: block; margin: 0.8em auto; border-radius: 4px; }
+.prose figure { margin: 1em 0; }
+.prose figcaption { font-family: var(--font-ui); font-size: 13px; color: var(--muted); }
+.prose blockquote { margin: 1em 0; padding-left: 14px; border-left: 3px solid var(--line); color: var(--muted); }
+.prose a { color: var(--accent); }
+.prose pre, .prose code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.85em; }
+.prose pre { overflow-x: auto; background: var(--chip); padding: 10px; border-radius: 4px; }
+.prose table { display: block; overflow-x: auto; border-collapse: collapse; font-family: var(--font-ui); font-size: 14px; }
+.prose td, .prose th { border: 1px solid var(--line); padding: 4px 8px; }
+.prose ul, .prose ol { padding-left: 1.3em; margin: 0 0 1em; }
+.noimg {
+  display: block; margin: 0.8em 0; padding: 18px 12px; text-align: center;
+  background: var(--chip); color: var(--muted); border-radius: 4px;
+  font-family: var(--font-ui); font-size: 13px;
+}
+.noimg::before { content: "Bild nicht gespeichert"; }
+::highlight(markierung) { background-color: var(--hl); }
+mark.hl { background: var(--hl); color: inherit; border-radius: 2px; }
+
+.section { display: flex; flex-direction: column; gap: 10px; }
+ul.list { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.item {
+  background: var(--paper); border: 1px solid var(--line); border-radius: 6px;
+  padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; min-width: 0;
+}
+.quote {
+  font-family: var(--font-read); font-size: 16px; line-height: 1.5;
+  display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;
+  background: linear-gradient(var(--hl), var(--hl)) no-repeat 0 100% / 100% 0.45em;
+}
+.item-foot { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
+.how { font-size: 12.5px; color: var(--muted); }
+.how.lost { color: var(--bad); }
+.actions { display: flex; gap: 8px; }
+
+.kvs { display: flex; flex-direction: column; background: var(--paper); border: 1px solid var(--line); border-radius: 6px; }
+.kv { display: flex; justify-content: space-between; gap: 12px; padding: 8px 12px; border-bottom: 1px solid var(--line); font-size: 14px; }
+.kv:last-child { border-bottom: 0; }
+.kv .k { color: var(--muted); flex: none; }
+.kv .v { text-align: right; overflow-wrap: anywhere; }
+.log {
+  margin: 0; padding: 10px; background: var(--paper); border: 1px solid var(--line); border-radius: 6px;
+  font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; white-space: pre-wrap; overflow-wrap: anywhere;
+}
+
+.bar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 5;
+  background: var(--paper); border-top: 1px solid var(--line);
+  padding: 10px max(16px, env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+.bar .label { font-size: 14px; color: var(--muted); min-width: 0; }
+.bar .label.done { color: var(--ok); font-weight: 600; }
+.bar button { flex: none; min-width: 120px; }
+
+/* ---- Suche und Schlagwörter (0.3.0) ---- */
+.find { display: flex; flex-direction: column; gap: 10px; }
+.find-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.tags-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; -webkit-overflow-scrolling: touch; }
+.tags-row.wrap-tags { flex-wrap: wrap; overflow-x: visible; }
+.tags-row:empty { display: none; }
+.tag {
+  flex: none;
+  font-size: 13.5px; font-weight: 500;
+  min-height: 34px; padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--chip); border: 1px solid transparent; color: var(--ink);
+  white-space: nowrap;
+}
+.tag .n { color: var(--muted); font-weight: 400; margin-left: 4px; }
+.tag.on { background: var(--accent); color: var(--accent-ink); }
+.tag.on .n { color: inherit; opacity: 0.8; }
+.tag.sug { background: transparent; border: 1px dashed var(--line); }
+.tag.rm::after { content: " \00d7"; color: var(--muted); }
+.tag-add { flex-wrap: nowrap; }
+.tag-add input { flex: 1; min-width: 0; font: inherit; color: var(--ink); background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 9px 12px; }
+.card-tags { font-size: 12.5px; color: var(--accent); }
+.card-snippet { font-size: 13.5px; color: var(--ink); overflow-wrap: anywhere; }
+.card-snippet .lbl { color: var(--muted); font-size: 12px; margin-right: 4px; }
+.card-snippet mark, .quote mark { background: var(--hl); color: inherit; border-radius: 2px; }
+.hitbar {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  background: var(--paper); border: 1px solid var(--line); border-left: 4px solid #3B8FD9;
+  border-radius: 6px; padding: 8px 12px; font-size: 14px; overflow-wrap: anywhere;
+}
+::highlight(treffer) { background-color: rgba(80, 160, 240, 0.40); }
+mark.hit { background: rgba(80, 160, 240, 0.40); color: inherit; border-radius: 2px; }
+.manage-row { display: flex; flex-direction: column; gap: 8px; }
+.manage-name { font-weight: 600; overflow-wrap: anywhere; }
+.manage-name .n { color: var(--muted); font-weight: 400; margin-left: 6px; }
+.manage-edit { display: flex; gap: 8px; }
+.manage-edit input { flex: 1; min-width: 0; font: inherit; color: var(--ink); background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; }
+@media (prefers-color-scheme: dark) { .hitbar { border-left-color: #6BB6D6; } }
+
+/* ---- Sicherung (0.4.0) ---- */
+.modes { display: flex; flex-direction: column; gap: 10px; }
+.mode { display: flex; gap: 10px; align-items: flex-start; background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; }
+.mode input { margin-top: 4px; flex: none; }
+.mode .hint { font-size: 13px; }
+progress.bk { width: 100%; }
+
+/* ---- Eigener Text (0.5.0) ---- */
+textarea { width: 100%; box-sizing: border-box; font: inherit; font-size: 16px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 6px; background: var(--paper); color: inherit; resize: vertical; min-height: 40vh; }
+
+</style>
+</head>
+<body>
+<div class="wrap" id="view-list">
+  <header class="top">
+    <div class="top-row">
+      <h1 id="app-title">Yves’ Onlineartikel Archiv <span class="count" id="count"></span></h1>
+      <span class="row">
+        <button id="backup-btn" class="small" aria-label="Sicherung und Wiederherstellung">Sicherung</button>
+        <button id="info-btn" class="small" aria-label="Informationen und Protokoll">Info</button>
+      </span>
+    </div>
+    <div id="backup-note" class="status warn" hidden></div>
+  </header>
+
+  <section class="add">
+    <label for="url" class="kicker">Artikel speichern</label>
+    <input type="text" id="url" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Link hier einfügen">
+    <div class="row">
+      <button id="save" class="primary">Speichern</button>
+      <button id="paste">Aus Zwischenablage</button>
+      <button id="note-open">Text einfügen</button>
+    </div>
+    <p class="hint">Oder in einer anderen App «Teilen» wählen und dieses Archiv antippen.</p>
+    <div id="status" class="status" role="status" aria-live="polite" hidden></div>
+  </section>
+
+  <section class="find">
+    <label for="find" class="kicker">Suchen</label>
+    <input type="search" id="find" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Titel, Text, Markierungen, Schlagwörter">
+    <div class="tags-row" id="tag-filter" aria-label="Nach Schlagwort filtern"></div>
+    <div class="find-foot">
+      <span class="hint" id="result-info"></span>
+      <span class="row">
+        <button id="reset-filter" class="small" hidden>Zurücksetzen</button>
+        <button id="manage-tags" class="small">Schlagwörter verwalten</button>
+      </span>
+    </div>
+  </section>
+
+  <ul class="articles" id="articles"></ul>
+  <p class="hint" id="empty" hidden>Noch kein Artikel gespeichert.</p>
+</div>
+
+<div class="wrap" id="view-reader" hidden>
+  <div class="reader-top">
+    <button id="back" class="small">‹ Zurück</button>
+    <a id="r-orig" class="orig" href="#">Original öffnen</a>
+  </div>
+  <div class="hitbar" id="hit-bar" hidden>
+    <span id="hit-text"></span>
+    <button id="hit-off" class="small">Ausblenden</button>
+  </div>
+  <article class="paper">
+    <p class="meta" id="r-meta"></p>
+    <h2 id="r-title"></h2>
+    <div class="prose" id="body"></div>
+  </article>
+
+  <section class="section">
+    <h3>Schlagwörter <span id="tag-count"></span></h3>
+    <div class="tags-row wrap-tags" id="r-tags"></div>
+    <div class="row tag-add">
+      <input type="text" id="tag-input" autocomplete="off" autocapitalize="sentences" spellcheck="false" placeholder="Schlagwort hinzufügen" maxlength="60">
+      <button id="tag-add">Hinzufügen</button>
+    </div>
+    <div class="tags-row wrap-tags" id="tag-suggest" aria-label="Vorschläge"></div>
+    <p class="hint" id="tag-msg" hidden></p>
+  </section>
+
+  <section class="section">
+    <h3>Markierungen <span id="hl-count"></span></h3>
+    <input type="search" id="q" placeholder="In Markierungen suchen" autocomplete="off">
+    <ul class="list" id="hl-list"></ul>
+    <p class="hint" id="hl-empty"></p>
+  </section>
+
+  <section class="section">
+    <button id="del-article">Artikel löschen</button>
+  </section>
+</div>
+
+<div class="wrap" id="view-tags" hidden>
+  <div class="reader-top">
+    <button id="tags-back" class="small">‹ Zurück</button>
+  </div>
+  <h1>Schlagwörter</h1>
+  <p class="hint">Hier kannst Du Schlagwörter umbenennen (auch zusammenführen) oder löschen. Die Artikel selbst bleiben unberührt.</p>
+  <ul class="list" id="tag-manage"></ul>
+  <p class="hint" id="tag-manage-empty" hidden>Noch keine Schlagwörter vergeben.</p>
+</div>
+
+<div class="wrap" id="view-note" hidden>
+  <div class="reader-top">
+    <button id="note-back" class="small">‹ Zurück</button>
+  </div>
+  <h1>Text speichern</h1>
+  <p class="hint">Für Texte ohne Link, oder wenn das Laden per Link nicht klappt: Text im Browser kopieren und hier einfügen (ins Feld tippen und halten, dann «Einfügen»).</p>
+  <section class="section">
+    <label for="note-title" class="kicker">Titel (sonst die erste Zeile)</label>
+    <input type="text" id="note-title" autocomplete="off" spellcheck="false" maxlength="300">
+    <label for="note-src" class="kicker">Quelle, Link (freiwillig)</label>
+    <input type="text" id="note-src" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="https://…">
+    <label for="note-text" class="kicker">Text</label>
+    <textarea id="note-text" rows="12" spellcheck="false"></textarea>
+    <div class="row"><button id="note-save" class="primary">Speichern</button><button id="note-cancel">Abbrechen</button></div>
+    <div id="note-status" class="status" role="status" aria-live="polite" hidden></div>
+  </section>
+</div>
+
+<div class="wrap" id="view-backup" hidden>
+  <div class="reader-top">
+    <button id="backup-back" class="small">‹ Zurück</button>
+  </div>
+  <h1>Sicherung</h1>
+
+  <section class="section">
+    <h3>Backup erstellen</h3>
+    <p class="hint">Packt alle Artikel mit Bildern, Markierungen und Schlagwörtern in eine einzige ZIP-Datei. Danach öffnet sich das Teilen-Menü: dort z. B. «OneDrive» wählen und einen Ordner bestimmen. Die Datei ist nicht verschlüsselt.</p>
+    <div class="row"><button id="bk-create" class="primary">Backup erstellen</button></div>
+    <div id="bk-status" class="status" role="status" aria-live="polite" hidden></div>
+    <p class="hint" id="bk-last"></p>
+  </section>
+
+  <section class="section">
+    <h3>Aus Backup wiederherstellen</h3>
+    <p class="hint">Zuerst die Backup-Datei aus OneDrive (oder wo sie liegt) aufs Handy holen, dann hier auswählen. Es wird nichts verändert, bevor Du bestätigt hast.</p>
+    <div class="row"><button id="bk-pick">Backup-Datei auswählen …</button></div>
+    <input type="file" id="bk-file" hidden>
+    <div id="bk-restore" class="section" hidden>
+      <div id="bk-summary" class="kvs"></div>
+      <div class="modes">
+        <label class="mode"><input type="radio" name="bk-mode" value="merge" checked>
+          <span><strong>Ergänzen</strong><br><span class="hint">Fehlende Artikel kommen dazu. Bei vorhandenen Artikeln werden fehlende Markierungen und Schlagwörter ergänzt. Es wird nichts gelöscht.</span></span></label>
+        <label class="mode"><input type="radio" name="bk-mode" value="replace">
+          <span><strong>Alles ersetzen</strong><br><span class="hint">Der Stand wird dem Backup gleichgemacht. Artikel, die nur hier vorhanden sind, werden gelöscht, und Markierungen und Schlagwörter der Artikel im Backup werden durch den Stand im Backup ersetzt.</span></span></label>
+      </div>
+      <p class="hint" id="bk-mode-note"></p>
+      <div class="row"><button id="bk-go" class="primary">Wiederherstellen</button><button id="bk-cancel">Abbrechen</button></div>
+    </div>
+    <div id="bk-rstatus" class="status" role="status" aria-live="polite" hidden></div>
+  </section>
+</div>
+
+<div class="wrap" id="view-info" hidden>
+  <div class="reader-top">
+    <button id="info-back" class="small">‹ Zurück</button>
+  </div>
+  <h1>Info</h1>
+  <div id="info-body" class="kvs"></div>
+  <section class="section">
+    <h3>Protokoll</h3>
+    <pre id="log" class="log"></pre>
+    <div class="row"><button id="log-copy">Protokoll kopieren</button></div>
+  </section>
+</div>
+
+<div class="bar" id="bar" hidden>
+  <span class="label" id="sel" aria-live="polite">Text auswählen, dann markieren</span>
+  <button class="primary" id="mark" disabled>Markieren</button>
+</div>
+<script src="Readability.js"></script>
+<script>
+/* ===== anchor.js ===== */
+// Anker-Logik: Markierungen im Text speichern und wiederfinden.
+// Verfahren nach dem W3C Web Annotation Data Model:
+// exakter Wortlaut + Text davor/danach (Quote) + Position (Offsets).
+const Anchor = (function () {
+  const CONTEXT = 32;
+
+  function trimRange(text, s, e) {
+    while (s < e && /\s/.test(text[s])) s++;
+    while (e > s && /\s/.test(text[e - 1])) e--;
+    return [s, e];
+  }
+
+  function makeSelector(text, start, end) {
+    return {
+      start: start,
+      end: end,
+      exact: text.slice(start, end),
+      prefix: text.slice(Math.max(0, start - CONTEXT), start),
+      suffix: text.slice(end, end + CONTEXT)
+    };
+  }
+
+  function commonSuffix(a, b) {
+    let n = 0;
+    while (n < a.length && n < b.length && a[a.length - 1 - n] === b[b.length - 1 - n]) n++;
+    return n;
+  }
+
+  function commonPrefix(a, b) {
+    let n = 0;
+    while (n < a.length && n < b.length && a[n] === b[n]) n++;
+    return n;
+  }
+
+  function allIndices(text, needle) {
+    const out = [];
+    if (!needle) return out;
+    let i = text.indexOf(needle);
+    while (i !== -1) {
+      out.push(i);
+      i = text.indexOf(needle, i + 1);
+    }
+    return out;
+  }
+
+  // 0..1: wie gut passt die Umgebung an Position i zur gespeicherten Umgebung
+  function contextScore(text, h, i) {
+    const pre = text.slice(Math.max(0, i - h.prefix.length), i);
+    const suf = text.slice(i + h.exact.length, i + h.exact.length + h.suffix.length);
+    const total = h.prefix.length + h.suffix.length;
+    if (total === 0) return 1;
+    return (commonSuffix(h.prefix, pre) + commonPrefix(h.suffix, suf)) / total;
+  }
+
+  function normalize(text) {
+    let out = '';
+    const map = [];
+    let prevSpace = false;
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i];
+      if (/\s/.test(c)) {
+        if (!prevSpace) {
+          out += ' ';
+          map.push(i);
+          prevSpace = true;
+        }
+      } else {
+        out += c;
+        map.push(i);
+        prevSpace = false;
+      }
+    }
+    return { out: out, map: map };
+  }
+
+  function closest(list, target) {
+    let best = list[0];
+    for (const v of list) if (Math.abs(v - target) < Math.abs(best - target)) best = v;
+    return best;
+  }
+
+  // Liefert {start, end, how} oder null, wenn die Stelle nicht mehr auffindbar ist.
+  function anchor(text, h) {
+    // 1) Position stimmt noch und die Umgebung passt
+    if (text.slice(h.start, h.end) === h.exact && contextScore(text, h, h.start) >= 0.5) {
+      return { start: h.start, end: h.end, how: 'Position' };
+    }
+
+    // 2) Wortlaut suchen, bei Mehrfachtreffern die Umgebung entscheiden lassen
+    const idx = allIndices(text, h.exact);
+    if (idx.length === 1) {
+      return { start: idx[0], end: idx[0] + h.exact.length, how: 'Wortlaut' };
+    }
+    if (idx.length > 1) {
+      let best = idx[0];
+      let bestScore = -1;
+      for (const i of idx) {
+        const sc = contextScore(text, h, i);
+        const better = sc > bestScore || (sc === bestScore && Math.abs(i - h.start) < Math.abs(best - h.start));
+        if (better) {
+          best = i;
+          bestScore = sc;
+        }
+      }
+      return { start: best, end: best + h.exact.length, how: 'Wortlaut + Umgebung' };
+    }
+
+    // 3) Wortlaut mit angepasstem Leerraum
+    const nt = normalize(text);
+    const nh = normalize(h.exact).out;
+    const nIdx = allIndices(nt.out, nh);
+    if (nIdx.length) {
+      const origStarts = nIdx.map(i => nt.map[i]);
+      const s = closest(origStarts, h.start);
+      const ni = nIdx[origStarts.indexOf(s)];
+      const e = nt.map[ni + nh.length - 1] + 1;
+      return { start: s, end: e, how: 'Wortlaut (Leerraum angepasst)' };
+    }
+
+    // 4) Unscharf: Anfang und Ende der Markierung einzeln suchen
+    const k = Math.min(24, Math.floor(h.exact.length / 2));
+    if (k >= 10) {
+      const head = h.exact.slice(0, k);
+      const tail = h.exact.slice(-k);
+      const heads = allIndices(text, head);
+      const tails = allIndices(text, tail);
+      let best = null;
+      for (const hi of heads) {
+        for (const ti of tails) {
+          const end = ti + k;
+          const len = end - hi;
+          if (end <= hi) continue;
+          if (len < h.exact.length * 0.5 || len > h.exact.length * 1.6) continue;
+          const cost = Math.abs(len - h.exact.length) + Math.abs(hi - h.start) / 1000;
+          if (!best || cost < best.cost) best = { start: hi, end: end, cost: cost };
+        }
+      }
+      if (best) return { start: best.start, end: best.end, how: 'Anfang + Ende (unscharf)' };
+    }
+
+    return null;
+  }
+
+  return { makeSelector: makeSelector, trimRange: trimRange, anchor: anchor };
+})();
+
+if (typeof module !== 'undefined') module.exports = Anchor;
+
+
+/* ===== sanitize.js ===== */
+// Bereinigung von Artikel-HTML nach dem Erlaubnislisten-Prinzip.
+// Es werden ausschliesslich neue, harmlose Elemente aufgebaut. Nichts aus der
+// Quelle wird übernommen, ausser dem Text und wenigen geprüften Attributen.
+// Kein innerHTML auf dem lebenden Dokument, keine Event-Attribute, keine Styles.
+const Sanitize = (function () {
+  const ALLOWED = new Set([
+    'p', 'br', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'blockquote', 'pre', 'code',
+    'em', 'strong', 'b', 'i', 'u', 's', 'del', 'ins', 'sub', 'sup', 'a', 'img', 'figure',
+    'figcaption', 'table', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td', 'caption', 'hr', 'div',
+    'span', 'section', 'article', 'small', 'cite', 'q', 'abbr', 'time', 'dl', 'dt', 'dd', 'mark',
+    'kbd', 'samp', 'var', 'wbr', 'address'
+  ]);
+  // Wird samt Inhalt verworfen
+  const DROP = new Set([
+    'script', 'style', 'noscript', 'iframe', 'frame', 'frameset', 'object', 'embed', 'applet',
+    'form', 'input', 'button', 'select', 'textarea', 'option', 'optgroup', 'svg', 'math', 'canvas',
+    'video', 'audio', 'source', 'track', 'template', 'link', 'meta', 'base', 'title', 'head',
+    'dialog', 'map', 'area', 'nav', 'aside', 'footer', 'header', 'menu', 'datalist', 'label',
+    'fieldset', 'legend', 'slot', 'portal', 'param', 'bgsound', 'marquee'
+  ]);
+  const VOID = new Set(['br', 'hr', 'img', 'wbr']);
+  const MAX_DEPTH = 120;
+
+  function safeLink(raw, base) {
+    if (!raw) return null;
+    let u;
+    try { u = new URL(String(raw).trim(), base); } catch (e) { return null; }
+    if (u.protocol === 'http:' || u.protocol === 'https:' || u.protocol === 'mailto:') return u.href;
+    return null;
+  }
+
+  const DATA_IMG = /^data:image\/(png|jpeg|jpg|gif|webp);base64,[A-Za-z0-9+/=\s]+$/i;
+
+  function imageSource(el, base) {
+    const cands = [
+      el.getAttribute('src'),
+      el.getAttribute('data-src'),
+      el.getAttribute('data-original'),
+      el.getAttribute('data-lazy-src')
+    ];
+    for (const c of cands) {
+      if (!c) continue;
+      const s = String(c).trim();
+      if (DATA_IMG.test(s) && s.length < 3000000) return s;
+      try {
+        const u = new URL(s, base);
+        if (u.protocol === 'http:' || u.protocol === 'https:') return u.href;
+      } catch (e) { /* nächster Kandidat */ }
+    }
+    return null;
+  }
+
+  function isTiny(el) {
+    const w = parseInt(el.getAttribute('width'), 10);
+    const h = parseInt(el.getAttribute('height'), 10);
+    return (w > 0 && w <= 2) || (h > 0 && h <= 2);
+  }
+
+  function walk(src, out, ctx, depth) {
+    if (depth > MAX_DEPTH) return;
+    for (let n = src.firstChild; n; n = n.nextSibling) {
+      if (n.nodeType === 3) {
+        out.appendChild(document.createTextNode(n.nodeValue));
+        continue;
+      }
+      if (n.nodeType !== 1) continue;
+      if (n.namespaceURI && n.namespaceURI !== 'http://www.w3.org/1999/xhtml') continue;
+      const tag = n.localName;
+      if (DROP.has(tag)) continue;
+      if (!ALLOWED.has(tag)) { // unbekannt: Inhalt behalten, Hülle weglassen
+        walk(n, out, ctx, depth + 1);
+        continue;
+      }
+      if (tag === 'img') {
+        if (isTiny(n)) continue;
+        const el = document.createElement('img');
+        if (ctx.mode === 'render') {
+          const i = parseInt(n.getAttribute('data-i'), 10);
+          if (!(i >= 0)) continue;
+          el.setAttribute('data-i', String(i));
+        } else {
+          const url = imageSource(n, ctx.base);
+          if (!url) continue;
+          let i = ctx.index.get(url);
+          if (i === undefined) {
+            i = ctx.images.length;
+            ctx.images.push(url);
+            ctx.index.set(url, i);
+          }
+          el.setAttribute('data-i', String(i));
+        }
+        const alt = n.getAttribute('alt');
+        if (alt) el.setAttribute('alt', alt.slice(0, 300));
+        out.appendChild(el);
+        continue;
+      }
+      const el = document.createElement(tag);
+      if (tag === 'a') {
+        const href = safeLink(n.getAttribute('href'), ctx.base);
+        if (href) {
+          el.setAttribute('href', href);
+          el.setAttribute('target', '_blank');
+          el.setAttribute('rel', 'noopener noreferrer nofollow');
+        }
+      } else if (tag === 'td' || tag === 'th') {
+        const cs = parseInt(n.getAttribute('colspan'), 10);
+        const rs = parseInt(n.getAttribute('rowspan'), 10);
+        if (cs > 1 && cs < 50) el.setAttribute('colspan', String(cs));
+        if (rs > 1 && rs < 200) el.setAttribute('rowspan', String(rs));
+      }
+      if (!VOID.has(tag)) walk(n, el, ctx, depth + 1);
+      out.appendChild(el);
+    }
+  }
+
+  // html: Zeichenkette. Optionen: base (URL für relative Adressen),
+  // mode 'ingest' (aus dem Netz: Bilder werden gesammelt) oder 'render' (gespeichert: data-i bleibt).
+  // Ergebnis: { el: <div> mit bereinigten Kindern, images: [absolute URLs] }
+  function run(html, opts) {
+    opts = opts || {};
+    const doc = new DOMParser().parseFromString(String(html || ''), 'text/html');
+    const out = document.createElement('div');
+    const ctx = {
+      base: opts.base || 'about:blank',
+      mode: opts.mode || 'ingest',
+      images: [],
+      index: new Map()
+    };
+    walk(doc.body || doc.documentElement, out, ctx, 0);
+    return { el: out, images: ctx.images };
+  }
+
+  return { run: run, safeLink: safeLink };
+})();
+
+if (typeof module !== 'undefined') module.exports = Sanitize;
+
+
+/* ===== extract.js ===== */
+// Artikeltext aus einer Webseite gewinnen.
+// 1. Wahl: Mozilla Readability (wird als eigene Datei dazugeladen, falls vorhanden).
+// 2. Wahl: einfacher eigener Extraktor, falls Readability fehlt oder nichts findet.
+const Extract = (function () {
+  const MIN_TEXT = 200;
+
+  function parseDoc(html, url) {
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    doc.querySelectorAll('base').forEach(function (b) { b.remove(); });
+    const base = doc.createElement('base');
+    base.setAttribute('href', url);
+    (doc.head || doc.documentElement).insertBefore(base, (doc.head || doc.documentElement).firstChild);
+    return doc;
+  }
+
+  function meta(doc, keys) {
+    for (const k of keys) {
+      const el = doc.querySelector('meta[property="' + k + '"], meta[name="' + k + '"]');
+      const v = el && el.getAttribute('content');
+      if (v && v.trim()) return v.trim();
+    }
+    return '';
+  }
+
+  function clean(s) { return (s || '').replace(/\s+/g, ' ').trim(); }
+
+  function fallbackExtract(doc) {
+    const list = Array.prototype.slice.call(doc.querySelectorAll('article, main, [role="main"], section, div'), 0, 4000);
+    let best = null;
+    const scored = [];
+    for (const el of list) {
+      const ps = el.querySelectorAll('p');
+      if (!ps.length) continue;
+      let text = 0, link = 0;
+      ps.forEach(function (p) {
+        const t = clean(p.textContent).length;
+        if (t < 40) return;
+        text += t;
+        p.querySelectorAll('a').forEach(function (a) { link += clean(a.textContent).length; });
+      });
+      if (text < MIN_TEXT) continue;
+      const score = text * (1 - Math.min(1, link / (text + 1)));
+      scored.push({ el: el, score: score, len: clean(el.textContent).length });
+    }
+    if (!scored.length) return null;
+    scored.sort(function (a, b) { return b.score - a.score; });
+    const top = scored[0].score;
+    // unter den fast gleich guten Kandidaten den kleinsten (innersten) nehmen
+    const close = scored.filter(function (s) { return s.score >= top * 0.85; });
+    close.sort(function (a, b) { return a.len - b.len; });
+    best = close[0].el;
+    const h1 = best.querySelector('h1') || doc.querySelector('h1');
+    return {
+      title: h1 ? clean(h1.textContent) : '',
+      content: best.innerHTML,
+      byline: '',
+      via: 'Eigener Extraktor'
+    };
+  }
+
+  // Ergebnis: { title, byline, site, lang, dir, published, excerpt, html, text, images, via }
+  function extract(html, url) {
+    const doc = parseDoc(html, url);
+    const mTitle = meta(doc, ['og:title', 'twitter:title']) || clean(doc.title);
+    const mSite = meta(doc, ['og:site_name']);
+    const mAuthor = meta(doc, ['author', 'article:author', 'og:article:author']);
+    const mPublished = meta(doc, ['article:published_time', 'datePublished', 'date']);
+    const lang = (doc.documentElement && doc.documentElement.getAttribute('lang')) || '';
+
+    let art = null;
+    let via = '';
+    if (typeof Readability === 'function') {
+      try {
+        const r = new Readability(doc.cloneNode(true), { charThreshold: MIN_TEXT }).parse();
+        if (r && r.content && clean(r.textContent).length >= MIN_TEXT) {
+          art = { title: r.title, content: r.content, byline: r.byline, site: r.siteName, lang: r.lang, dir: r.dir, published: r.publishedTime };
+          via = 'Readability';
+        }
+      } catch (e) { /* weiter mit Ersatz */ }
+    }
+    if (!art) {
+      const f = fallbackExtract(doc);
+      if (f) { art = f; via = f.via; }
+    }
+    if (!art) throw new Error('Kein Artikeltext erkannt. Die Seite lädt ihren Inhalt vielleicht erst per Skript nach oder liegt hinter einer Anmeldung.');
+
+    const res = Sanitize.run(art.content, { base: url, mode: 'ingest' });
+    let host = '';
+    try { host = new URL(url).hostname.replace(/^www\./, ''); } catch (e) { /* leer */ }
+    const title = clean(art.title) || mTitle || host || url;
+
+    // Steht der Titel schon als erste Überschrift im Text, wird er dort weggelassen (er steht im Kopf der Leseansicht)
+    const first = res.el.querySelector('h1, h2');
+    if (first) {
+      const ft = clean(first.textContent).toLowerCase();
+      const known = [title, clean(art.title), mTitle].map(function (t) { return clean(t).toLowerCase(); }).filter(Boolean);
+      const same = ft && known.some(function (t) { return t === ft || (t.length > 12 && ft.length > 12 && (t.indexOf(ft) !== -1 || ft.indexOf(t) !== -1)); });
+      const early = clean(res.el.textContent).toLowerCase().indexOf(ft) < 120;
+      if (same && early) first.remove();
+    }
+
+    const text = res.el.textContent;
+    if (clean(text).length < 100) throw new Error('Kein brauchbarer Artikeltext gefunden.');
+    return {
+      title: title.slice(0, 300),
+      byline: clean(art.byline || mAuthor).slice(0, 200),
+      site: clean(art.site || mSite || host).slice(0, 120),
+      lang: art.lang || lang || '',
+      dir: art.dir === 'rtl' ? 'rtl' : '',
+      published: art.published || mPublished || '',
+      excerpt: clean(text).slice(0, 220),
+      html: res.el.innerHTML,
+      text: text,
+      images: res.images,
+      via: via
+    };
+  }
+
+  return { extract: extract, parseDoc: parseDoc };
+})();
+
+if (typeof module !== 'undefined') module.exports = Extract;
+
+
+/* ===== net.js ===== */
+// Netzzugriff. Auf dem Smartphone läuft alles über den nativen HTTP-Dienst von Capacitor
+// (umgeht die Browser-Beschränkung CORS). Geladen wird nur, was der Nutzer speichert:
+// die Artikelseite selbst und ihre Bilder. Sonst geht nichts ins Internet.
+const Net = (function () {
+  const UA = 'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Mobile Safari/537.36';
+  const MAX_HTML = 6 * 1024 * 1024;
+  const MAX_IMG = 8 * 1024 * 1024;
+
+  function plugin() {
+    const c = window.Capacitor;
+    return c && c.Plugins && c.Plugins.CapacitorHttp;
+  }
+  function isNative() {
+    const c = window.Capacitor;
+    return !!(c && typeof c.isNativePlatform === 'function' && c.isNativePlatform());
+  }
+  function header(h, name) {
+    if (!h) return '';
+    const k = Object.keys(h).find(function (x) { return x.toLowerCase() === name; });
+    return k ? String(h[k]) : '';
+  }
+  function HttpError(status) {
+    const e = new Error('Die Seite antwortet mit Fehler ' + status + '.');
+    e.status = status;
+    return e;
+  }
+
+  function b64ToBytes(s) {
+    s = String(s).replace(/^data:[^,]*,/, '').replace(/\s+/g, '');
+    const bin = atob(s);
+    const out = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+    return out;
+  }
+
+  function sniff(b) {
+    if (b.length < 12) return null;
+    if (b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4E && b[3] === 0x47) return 'image/png';
+    if (b[0] === 0xFF && b[1] === 0xD8 && b[2] === 0xFF) return 'image/jpeg';
+    if (b[0] === 0x47 && b[1] === 0x49 && b[2] === 0x46 && b[3] === 0x38) return 'image/gif';
+    if (b[0] === 0x52 && b[1] === 0x49 && b[2] === 0x46 && b[3] === 0x46 && b[8] === 0x57 && b[9] === 0x45 && b[10] === 0x42 && b[11] === 0x50) return 'image/webp';
+    if (b[4] === 0x66 && b[5] === 0x74 && b[6] === 0x79 && b[7] === 0x70 && b[8] === 0x61 && b[9] === 0x76 && b[10] === 0x69 && b[11] === 0x66) return 'image/avif';
+    const head = new TextDecoder().decode(b.subarray(0, Math.min(b.length, 400))).toLowerCase();
+    if (head.indexOf('<svg') !== -1) return 'image/svg+xml';
+    return null;
+  }
+
+  async function request(opts) {
+    const p = plugin();
+    if (isNative() && p && typeof p.request === 'function') {
+      return p.request(opts);
+    }
+    return null; // kein nativer Dienst
+  }
+
+  async function getText(url) {
+    if (window.__NET_TEST__) return window.__NET_TEST__.getText(url);
+    let cur = url;
+    for (let hop = 0; hop < 6; hop++) {
+      let res = await request({
+        url: cur,
+        method: 'GET',
+        headers: {
+          'User-Agent': UA,
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+          'Accept-Language': 'de-CH,de;q=0.9,en;q=0.7',
+          'Upgrade-Insecure-Requests': '1',
+          'Sec-Fetch-Dest': 'document',
+          'Sec-Fetch-Mode': 'navigate',
+          'Sec-Fetch-Site': 'none',
+          'Sec-Fetch-User': '?1',
+          'sec-ch-ua': '"Chromium";v="130", "Google Chrome";v="130", "Not?A_Brand";v="99"',
+          'sec-ch-ua-mobile': '?1',
+          'sec-ch-ua-platform': '"Android"'
+        },
+        responseType: 'text',
+        connectTimeout: 15000,
+        readTimeout: 25000
+      });
+      let status, data, headers, finalUrl;
+      if (res) {
+        status = res.status; data = res.data; headers = res.headers; finalUrl = res.url || cur;
+      } else { // Entwicklungs-Browser ohne nativen Dienst
+        const r = await fetch(cur);
+        status = r.status; headers = {}; r.headers.forEach(function (v, k) { headers[k] = v; });
+        data = await r.text(); finalUrl = r.url || cur;
+      }
+      if (status >= 300 && status < 400 && header(headers, 'location')) {
+        cur = new URL(header(headers, 'location'), cur).href;
+        continue;
+      }
+      if (status < 200 || status >= 300) {
+        const err = HttpError(status);
+        // Hinweise für das Protokoll: wer antwortet und womit (hilft, Sperren zu erkennen)
+        const hd = ['server', 'cf-ray', 'cf-mitigated', 'content-type', 'x-datadome', 'retry-after'].map(function (k) {
+          const v = header(headers, k); return v ? k + '=' + v : '';
+        }).filter(Boolean).join('; ');
+        const snip = typeof data === 'string' ? data.replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>|<[^>]*>/gi, ' ').replace(/\s+/g, ' ').trim().slice(0, 160) : '';
+        err.viaBrowser = (status === 403 || status === 429 || status === 503);
+        err.challenge = /challenge/i.test(header(headers, 'cf-mitigated')) || /just a moment|enable javascript and cookies|einen moment/i.test(snip);
+        err.detail = 'Antwort ' + status + ' von ' + cur + (hd ? ' | ' + hd : '') + (snip ? ' | Text: ' + snip : '');
+        throw err;
+      }
+      const ct = header(headers, 'content-type').toLowerCase();
+      if (ct && !/html|xml|text\/plain/.test(ct)) throw new Error('Unter diesem Link liegt kein Artikel (Typ: ' + ct.split(';')[0] + ').');
+      if (typeof data !== 'string') throw new Error('Unerwartete Antwort der Seite.');
+      if (data.length > MAX_HTML) throw new Error('Die Seite ist zu gross.');
+      return { html: data, url: finalUrl };
+    }
+    throw new Error('Zu viele Weiterleitungen.');
+  }
+
+  // Liefert { blob, type } oder wirft einen Fehler. Prüft die Dateikennung der Bytes.
+  async function getImage(url, referer) {
+    if (window.__NET_TEST__) return window.__NET_TEST__.getImage(url, referer);
+    const headers = { 'User-Agent': UA, 'Accept': 'image/avif,image/webp,image/*,*/*;q=0.8', 'Referer': referer };
+    let bytes = null;
+    let how = '';
+    const res = await request({ url: url, method: 'GET', headers: headers, responseType: 'blob', connectTimeout: 15000, readTimeout: 25000 });
+    if (res) {
+      if (res.status < 200 || res.status >= 300) throw HttpError(res.status);
+      if (typeof res.data === 'string') {
+        try { bytes = b64ToBytes(res.data); how = 'nativ/base64'; } catch (e) { bytes = null; }
+      }
+    }
+    if (!bytes) { // zweiter Weg: umgeleiteter fetch
+      const r = await fetch(url, { headers: { 'Accept': headers.Accept } });
+      if (!r.ok) throw HttpError(r.status);
+      bytes = new Uint8Array(await r.arrayBuffer());
+      how = 'fetch';
+    }
+    if (bytes.length > MAX_IMG) throw new Error('Bild zu gross');
+    const type = sniff(bytes);
+    if (!type) throw new Error('Kein erkennbares Bildformat (' + how + ')');
+    return { blob: new Blob([bytes], { type: type }), type: type, how: how };
+  }
+
+
+  /* ---------- Fallback: Seite in einer echten Browser-Ansicht laden ----------
+     Für Seiten, die per einfacher Anfrage nur eine Prüfseite liefern (z. B. Cloudflare «Just a moment»).
+     Die Browser-Ansicht führt die Prüfung wie jeder Browser aus; danach wird der fertige Seitentext ausgelesen. */
+  function browserPlugin() {
+    const c = window.Capacitor;
+    return c && c.Plugins && c.Plugins.InAppBrowser;
+  }
+  function browserAvailable() {
+    const p = browserPlugin();
+    return !!(p && typeof p.openWebView === 'function' && typeof p.executeScript === 'function' && typeof p.addListener === 'function');
+  }
+  // Wird in der geladenen Seite ausgeführt: wartet, bis die Prüfung vorbei ist, und meldet dann den Seitentext.
+  const PROBE = '(' + function () {
+    if (window.__oaProbe) return;
+    window.__oaProbe = 1;
+    var n = 0;
+    var timer = setInterval(function () {
+      n++;
+      var d = document;
+      var title = d.title || '';
+      var text = d.body ? (d.body.innerText || '') : '';
+      var challenge = /just a moment|einen moment|un instant|attention required|checking your browser/i.test(title) ||
+        !!d.querySelector('#challenge-running, #challenge-form, #cf-challenge-running, .cf-turnstile, #challenge-stage');
+      var ready = d.readyState === 'complete' && !challenge && text.length > 300;
+      if (ready || n > 240) {
+        clearInterval(timer);
+        try {
+          window.mobileApp.postMessage({ detail: { oa: 1, ok: ready, title: title, url: location.href, html: '<!doctype html>' + d.documentElement.outerHTML } });
+        } catch (e) { /* kein Rückkanal */ }
+      }
+    }, 500);
+  } + ')();';
+
+  async function getTextViaBrowser(url, onState) {
+    const p = browserPlugin();
+    if (!browserAvailable()) throw new Error('Die Browser-Ansicht ist in dieser App-Version nicht eingebaut.');
+    const TIMEOUT = 120000;
+    const handles = [];
+    let settled = false;
+    let id = null;
+    function cleanup() {
+      handles.forEach(function (h) { try { h && h.remove && h.remove(); } catch (e) { /* ignorieren */ } });
+    }
+    return new Promise(async function (resolve, reject) {
+      let timer = null;
+      function finish(fn, val, close) {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        cleanup();
+        if (close) { try { Promise.resolve(p.close(id ? { id: id } : undefined)).catch(function () {}); } catch (e) { /* schon zu */ } }
+        fn(val);
+      }
+      async function inject() {
+        try { await p.executeScript(id ? { code: PROBE, id: id } : { code: PROBE }); } catch (e) { /* Seite noch nicht bereit */ }
+      }
+      try {
+        handles.push(await p.addListener('messageFromWebview', function (ev) {
+          let d = ev && ev.detail;
+          if (!d && ev && ev.rawMessage) { try { d = JSON.parse(ev.rawMessage); d = d.detail || d; } catch (e) { d = null; } }
+          if (!d || !d.oa) return;
+          if (!d.ok) return finish(reject, new Error('Die Seite hat die Browser-Prüfung nicht bestanden oder zu lange gebraucht.'), true);
+          if (typeof d.html !== 'string' || d.html.length > MAX_HTML) return finish(reject, new Error('Die Seite ist zu gross.'), true);
+          finish(resolve, { html: d.html, url: d.url || url }, true);
+        }));
+        handles.push(await p.addListener('browserPageLoaded', function () {
+          if (onState) onState('loaded');
+          inject();
+        }));
+        handles.push(await p.addListener('closeEvent', function () {
+          finish(reject, new Error('Browser-Ansicht wurde geschlossen, bevor die Seite geladen war.'), false);
+        }));
+        timer = setTimeout(function () {
+          finish(reject, new Error('Zeitüberschreitung: Die Seite wurde in der Browser-Ansicht nicht rechtzeitig fertig.'), true);
+        }, TIMEOUT);
+        const r = await p.openWebView({ url: url });
+        id = r && r.id ? r.id : null;
+        inject(); // falls das Ladeereignis schon vorbei ist
+      } catch (e) {
+        finish(reject, new Error('Browser-Ansicht konnte nicht geöffnet werden: ' + ((e && e.message) || e)), true);
+      }
+    });
+  }
+
+  return { getTextViaBrowser: getTextViaBrowser, browserAvailable: browserAvailable, getText: getText, getImage: getImage, isNative: isNative, plugin: plugin, sniff: sniff, b64ToBytes: b64ToBytes };
+})();
+
+if (typeof module !== 'undefined') module.exports = Net;
+
+
+/* ===== search.js ===== */
+// Suche: Gross-/Kleinschreibung und Akzente werden ignoriert, deutsche Schreibweisen gleichgestellt
+// (ä = ae, ö = oe, ü = ue, ß = ss). Mehrere Suchwörter müssen alle vorkommen (UND),
+// ein Ausdruck in "Anführungszeichen" zählt als ein Wort.
+const Search = (function () {
+  const SPECIAL = { 'ä': 'ae', 'ö': 'oe', 'ü': 'ue', 'ß': 'ss', 'æ': 'ae', 'œ': 'oe', 'ø': 'o', 'đ': 'd', 'ł': 'l', 'ı': 'i', 'ð': 'd', 'þ': 'th' };
+
+  function foldChar(c) {
+    const code = c.charCodeAt(0);
+    if (code < 128) return (code >= 65 && code <= 90) ? String.fromCharCode(code + 32) : c;
+    const l = c.toLowerCase();
+    if (SPECIAL[l]) return SPECIAL[l];
+    return l.normalize('NFD').replace(/[̀-ͯ]/g, '');
+  }
+
+  // Gefaltete Fassung ohne Positionsangaben (schnell, für den Index)
+  function fold(text) {
+    text = String(text || '');
+    let out = '';
+    let prev = '';
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i];
+      if (c === '̈' && (prev === 'a' || prev === 'o' || prev === 'u')) { out += 'e'; prev = ''; continue; } // zerlegtes ä, ö, ü
+      out += foldChar(c);
+      prev = c.toLowerCase();
+    }
+    return out;
+  }
+
+  // Wie fold, merkt sich zusätzlich zu jedem Zeichen der gefalteten Fassung die Stelle im Original
+  function foldMap(text) {
+    text = String(text || '');
+    const map = [];
+    let out = '';
+    let prev = '';
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i];
+      let f;
+      if (c === '̈' && (prev === 'a' || prev === 'o' || prev === 'u')) { f = 'e'; prev = ''; }
+      else { f = foldChar(c); prev = c.toLowerCase(); }
+      for (let k = 0; k < f.length; k++) map.push(i);
+      out += f;
+    }
+    return { s: out, map: map };
+  }
+
+  function tokenize(q) {
+    const out = [];
+    const re = /"([^"]+)"|(\S+)/g;
+    let m;
+    while ((m = re.exec(String(q || '')))) {
+      const t = fold((m[1] || m[2]).trim()).replace(/\s+/g, ' ').replace(/^"+|"+$/g, '');
+      if (t) out.push(t);
+    }
+    return out;
+  }
+
+  function count(hay, needle, cap) {
+    let n = 0, i = hay.indexOf(needle);
+    while (i !== -1 && n < cap) { n++; i = hay.indexOf(needle, i + needle.length); }
+    return n;
+  }
+
+  // item: { id, title, tags, hls: [gefaltete Markierungstexte], text }  (alles bereits gefaltet)
+  // Ergebnis: null (kein Treffer) oder { score, inTitle, inTags, inHl, inText }
+  function match(item, tokens) {
+    let score = 0;
+    const where = { inTitle: false, inTags: false, inHl: false, inText: false };
+    for (const t of tokens) {
+      let hit = false;
+      if (item.title.indexOf(t) !== -1) { score += 10; where.inTitle = hit = true; }
+      if (item.tags.indexOf(t) !== -1) { score += 8; where.inTags = hit = true; }
+      for (const h of item.hls) {
+        if (h.indexOf(t) !== -1) { score += 5; where.inHl = hit = true; break; }
+      }
+      const c = count(item.text, t, 5);
+      if (c) { score += 1 + c * 0.2; where.inText = hit = true; }
+      if (!hit) return null;
+    }
+    return Object.assign({ score: score }, where);
+  }
+
+  function buildItem(meta, text, hlTexts) {
+    return {
+      id: meta.id,
+      title: fold([meta.title, meta.site, meta.byline].filter(Boolean).join(' ')),
+      tags: fold((meta.tags || []).join(' ')),
+      hls: (hlTexts || []).map(fold),
+      text: fold(text || '')
+    };
+  }
+
+  // Textausschnitt um den ersten Fund; Ergebnis { before, match, after } aus dem Originaltext
+  function snippet(original, tokens, radius) {
+    radius = radius || 70;
+    const fm = foldMap(original);
+    let best = -1, bestLen = 0;
+    for (const t of tokens) {
+      const i = fm.s.indexOf(t);
+      if (i !== -1 && (best === -1 || i < best)) { best = i; bestLen = t.length; }
+    }
+    if (best === -1) return null;
+    const s = fm.map[best];
+    const e = fm.map[Math.min(best + bestLen - 1, fm.map.length - 1)] + 1;
+    let a = Math.max(0, s - radius);
+    let b = Math.min(original.length, e + radius);
+    if (a > 0) { const sp = original.indexOf(' ', a); if (sp !== -1 && sp < s) a = sp + 1; }
+    if (b < original.length) { const sp = original.lastIndexOf(' ', b); if (sp > e) b = sp; }
+    return {
+      before: (a > 0 ? '… ' : '') + original.slice(a, s).replace(/\s+/g, ' '),
+      match: original.slice(s, e),
+      after: original.slice(e, b).replace(/\s+/g, ' ') + (b < original.length ? ' …' : '')
+    };
+  }
+
+  // Alle Fundstellen (Start, Ende) der Suchwörter in einem Originaltext, höchstens limit Stück, nach Start sortiert
+  function occurrences(original, tokens, limit) {
+    const fm = foldMap(original);
+    const out = [];
+    for (const t of tokens) {
+      let i = fm.s.indexOf(t);
+      while (i !== -1 && out.length < limit) {
+        out.push([fm.map[i], fm.map[i + t.length - 1] + 1]);
+        i = fm.s.indexOf(t, i + t.length);
+      }
+    }
+    out.sort(function (x, y) { return x[0] - y[0]; });
+    return out;
+  }
+
+  return { fold: fold, foldMap: foldMap, tokenize: tokenize, match: match, buildItem: buildItem, snippet: snippet, occurrences: occurrences };
+})();
+
+if (typeof module !== 'undefined') module.exports = Search;
+
+
+/* ===== store.js ===== */
+// Lokaler Speicher (IndexedDB). Vier Ablagen:
+//  articles   Metadaten (klein, für die Liste)
+//  bodies     bereinigtes Artikel-HTML
+//  images     Bilder als Blob, Schlüssel "<artikel>:<nr>"
+//  highlights Markierungen
+//  texts      Klartext je Artikel (für die Volltextsuche)
+const Store = (function () {
+  const DB = 'artikelarchiv';
+  const VERSION = 2;
+  let dbp = null;
+
+  function open() {
+    if (dbp) return dbp;
+    dbp = new Promise(function (resolve, reject) {
+      const req = indexedDB.open(DB, VERSION);
+      req.onupgradeneeded = function (ev) {
+        const db = req.result;
+        if (ev.oldVersion < 1) {
+          const a = db.createObjectStore('articles', { keyPath: 'id' });
+          a.createIndex('savedAt', 'savedAt');
+          a.createIndex('url', 'url');
+          db.createObjectStore('bodies', { keyPath: 'id' });
+          const im = db.createObjectStore('images', { keyPath: 'key' });
+          im.createIndex('articleId', 'articleId');
+          const h = db.createObjectStore('highlights', { keyPath: 'id' });
+          h.createIndex('articleId', 'articleId');
+        }
+        if (ev.oldVersion < 2) {
+          db.createObjectStore('texts', { keyPath: 'id' }); // Klartext für die Suche
+        }
+      };
+      req.onsuccess = function () { resolve(req.result); };
+      req.onerror = function () { reject(req.error || new Error('Speicher nicht verfügbar')); };
+      req.onblocked = function () { reject(new Error('Speicher blockiert')); };
+    });
+    return dbp;
+  }
+
+  function wrap(req) {
+    return new Promise(function (res, rej) {
+      req.onsuccess = function () { res(req.result); };
+      req.onerror = function () { rej(req.error); };
+    });
+  }
+
+  // Führt fn(stores) in einer Transaktion aus; fertig, wenn die Transaktion abgeschlossen ist.
+  async function tx(names, mode, fn) {
+    const db = await open();
+    return new Promise(function (resolve, reject) {
+      const t = db.transaction(names, mode);
+      const stores = {};
+      names.forEach(function (n) { stores[n] = t.objectStore(n); });
+      let result;
+      t.oncomplete = function () { resolve(result); };
+      t.onerror = function () { reject(t.error); };
+      t.onabort = function () { reject(t.error || new Error('Speichern abgebrochen')); };
+      try {
+        Promise.resolve(fn(stores)).then(function (r) { result = r; }, function (e) { try { t.abort(); } catch (x) { /* schon beendet */ } reject(e); });
+      } catch (e) {
+        try { t.abort(); } catch (x) { /* schon beendet */ }
+        reject(e);
+      }
+    });
+  }
+
+  function newId(prefix) {
+    return prefix + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  }
+
+  // Artikel samt Text und Bildern in einem Zug ablegen: ganz oder gar nicht.
+  async function saveArticle(meta, bodyHtml, images, text) {
+    await tx(['articles', 'bodies', 'images', 'texts'], 'readwrite', function (s) {
+      s.articles.put(meta);
+      s.bodies.put({ id: meta.id, html: bodyHtml });
+      s.texts.put({ id: meta.id, text: text || '' });
+      images.forEach(function (im) {
+        s.images.put({ key: meta.id + ':' + im.i, articleId: meta.id, i: im.i, type: im.type, blob: im.blob });
+      });
+    });
+  }
+
+  async function listArticles() {
+    const db = await open();
+    const all = await wrap(db.transaction('articles').objectStore('articles').getAll());
+    all.sort(function (a, b) { return b.savedAt - a.savedAt; });
+    return all;
+  }
+  async function getArticle(id) {
+    const db = await open();
+    const t = db.transaction(['articles', 'bodies']);
+    const meta = await wrap(t.objectStore('articles').get(id));
+    const body = await wrap(t.objectStore('bodies').get(id));
+    return meta && body ? { meta: meta, html: body.html } : null;
+  }
+  async function findByUrl(url) {
+    const db = await open();
+    const list = await wrap(db.transaction('articles').objectStore('articles').index('url').getAll(url));
+    return list[0] || null;
+  }
+  async function getImages(id) {
+    const db = await open();
+    return wrap(db.transaction('images').objectStore('images').index('articleId').getAll(id));
+  }
+  async function deleteArticle(id) {
+    await tx(['articles', 'bodies', 'images', 'highlights', 'texts'], 'readwrite', async function (s) {
+      s.articles.delete(id);
+      s.bodies.delete(id);
+      s.texts.delete(id);
+      const ik = await wrap(s.images.index('articleId').getAllKeys(id));
+      ik.forEach(function (k) { s.images.delete(k); });
+      const hk = await wrap(s.highlights.index('articleId').getAllKeys(id));
+      hk.forEach(function (k) { s.highlights.delete(k); });
+    });
+  }
+
+  async function highlightsOf(id) {
+    const db = await open();
+    const list = await wrap(db.transaction('highlights').objectStore('highlights').index('articleId').getAll(id));
+    list.sort(function (a, b) { return a.start - b.start; });
+    return list;
+  }
+  async function allHighlightCounts() {
+    const db = await open();
+    const all = await wrap(db.transaction('highlights').objectStore('highlights').getAll());
+    const m = {};
+    all.forEach(function (h) { m[h.articleId] = (m[h.articleId] || 0) + 1; });
+    return m;
+  }
+  async function putHighlight(h) {
+    await tx(['highlights'], 'readwrite', function (s) { s.highlights.put(h); });
+  }
+  async function deleteHighlight(id) {
+    await tx(['highlights'], 'readwrite', function (s) { s.highlights.delete(id); });
+  }
+
+  async function putMeta(meta) {
+    await tx(['articles'], 'readwrite', function (s) { s.articles.put(meta); });
+  }
+  async function putMetas(list) {
+    await tx(['articles'], 'readwrite', function (s) { list.forEach(function (m) { s.articles.put(m); }); });
+  }
+  async function allTexts() {
+    const db = await open();
+    return wrap(db.transaction('texts').objectStore('texts').getAll());
+  }
+  async function putText(id, text) {
+    await tx(['texts'], 'readwrite', function (s) { s.texts.put({ id: id, text: text }); });
+  }
+  async function allHighlights() {
+    const db = await open();
+    return wrap(db.transaction('highlights').objectStore('highlights').getAll());
+  }
+  // Artikel, zu denen noch kein Klartext vorliegt (gespeichert vor Version 0.3.0)
+  async function idsWithoutText() {
+    const db = await open();
+    const t = db.transaction(['bodies', 'texts']);
+    const a = await wrap(t.objectStore('bodies').getAllKeys());
+    const b = new Set(await wrap(t.objectStore('texts').getAllKeys()));
+    return a.filter(function (k) { return !b.has(k); });
+  }
+  async function getBodyHtml(id) {
+    const db = await open();
+    const r = await wrap(db.transaction('bodies').objectStore('bodies').get(id));
+    return r ? r.html : null;
+  }
+
+  // Für das Backup: alles zu einem Artikel auf einmal lesen
+  async function exportArticle(id) {
+    const db = await open();
+    const t = db.transaction(['articles', 'bodies', 'images', 'highlights']);
+    const meta = await wrap(t.objectStore('articles').get(id));
+    const body = await wrap(t.objectStore('bodies').get(id));
+    if (!meta || !body) return null;
+    const images = await wrap(t.objectStore('images').index('articleId').getAll(id));
+    const highlights = await wrap(t.objectStore('highlights').index('articleId').getAll(id));
+    return {
+      meta: meta,
+      html: body.html,
+      images: images.map(function (im) { return { i: im.i, type: im.type, blob: im.blob }; }),
+      highlights: highlights
+    };
+  }
+  // Ganzer Artikel in einer Transaktion: ganz oder gar nicht. overwrite: vorhandene Bilder und Markierungen vorher entfernen.
+  async function importArticle(rec, overwrite) {
+    await tx(['articles', 'bodies', 'images', 'highlights', 'texts'], 'readwrite', async function (s) {
+      if (overwrite) {
+        const ik = await wrap(s.images.index('articleId').getAllKeys(rec.meta.id));
+        ik.forEach(function (k) { s.images.delete(k); });
+        const hk = await wrap(s.highlights.index('articleId').getAllKeys(rec.meta.id));
+        hk.forEach(function (k) { s.highlights.delete(k); });
+      }
+      s.articles.put(rec.meta);
+      s.bodies.put({ id: rec.meta.id, html: rec.html });
+      s.texts.put({ id: rec.meta.id, text: rec.text || '' });
+      rec.images.forEach(function (im) {
+        s.images.put({ key: rec.meta.id + ':' + im.i, articleId: rec.meta.id, i: im.i, type: im.type, blob: im.blob });
+      });
+      rec.highlights.forEach(function (h) { s.highlights.put(h); });
+    });
+  }
+  // Vorhandener Artikel: Schlagwörter setzen und fehlende Markierungen ergänzen (nichts wird gelöscht)
+  async function mergeInto(id, tags, highlights) {
+    return tx(['articles', 'highlights'], 'readwrite', async function (s) {
+      const meta = await wrap(s.articles.get(id));
+      if (!meta) return { highlights: 0 };
+      meta.tags = tags;
+      s.articles.put(meta);
+      const have = await wrap(s.highlights.index('articleId').getAll(id));
+      const ids = new Set(have.map(function (h) { return h.id; }));
+      const spans = new Set(have.map(function (h) { return h.start + ':' + h.end + ':' + h.exact; }));
+      let n = 0;
+      highlights.forEach(function (h) {
+        if (ids.has(h.id) || spans.has(h.start + ':' + h.end + ':' + h.exact)) return;
+        s.highlights.put(h);
+        n++;
+      });
+      return { highlights: n };
+    });
+  }
+
+  async function stats() {
+    const db = await open();
+    const t = db.transaction(['articles', 'images', 'highlights']);
+    const out = {
+      articles: await wrap(t.objectStore('articles').count()),
+      images: await wrap(t.objectStore('images').count()),
+      highlights: await wrap(t.objectStore('highlights').count())
+    };
+    try {
+      if (navigator.storage && navigator.storage.estimate) {
+        const e = await navigator.storage.estimate();
+        out.usage = e.usage; out.quota = e.quota;
+      }
+    } catch (e) { /* nicht verfügbar */ }
+    return out;
+  }
+  async function persist() {
+    try {
+      if (navigator.storage && navigator.storage.persist) return await navigator.storage.persist();
+    } catch (e) { /* ignorieren */ }
+    return false;
+  }
+
+  return {
+    open: open, newId: newId, saveArticle: saveArticle, listArticles: listArticles, getArticle: getArticle,
+    findByUrl: findByUrl, getImages: getImages, deleteArticle: deleteArticle, highlightsOf: highlightsOf,
+    allHighlightCounts: allHighlightCounts, putHighlight: putHighlight, deleteHighlight: deleteHighlight,
+    putMeta: putMeta, putMetas: putMetas, allTexts: allTexts, putText: putText, allHighlights: allHighlights,
+    idsWithoutText: idsWithoutText, getBodyHtml: getBodyHtml,
+    exportArticle: exportArticle, importArticle: importArticle, mergeInto: mergeInto,
+    stats: stats, persist: persist
+  };
+})();
+
+if (typeof module !== 'undefined') module.exports = Store;
+
+
+/* ===== zip.js ===== */
+// Minimaler ZIP-Leser und -Schreiber (ohne Kompression, ohne ZIP64).
+// Die entstehende Datei ist eine ganz normale ZIP-Datei, die jedes Programm öffnen kann.
+// Bilder sind ohnehin komprimiert, deshalb werden alle Einträge unverändert abgelegt.
+const Zip = (function () {
+  const MAX_ENTRIES = 65000;
+  const MAX_BYTES = 4000000000;
+  const MAX_ENTRY = 128 * 1024 * 1024; // einzelner Eintrag beim Lesen
+
+  let table = null;
+  function crc32(bytes) {
+    if (!table) {
+      table = new Uint32Array(256);
+      for (let n = 0; n < 256; n++) {
+        let c = n;
+        for (let k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+        table[n] = c >>> 0;
+      }
+    }
+    let c = 0xFFFFFFFF;
+    for (let i = 0; i < bytes.length; i++) c = table[(c ^ bytes[i]) & 0xFF] ^ (c >>> 8);
+    return (c ^ 0xFFFFFFFF) >>> 0;
+  }
+
+  function dos(date) {
+    const d = date instanceof Date ? date : new Date();
+    const time = (d.getHours() << 11) | (d.getMinutes() << 5) | (d.getSeconds() >> 1);
+    const day = (Math.max(0, d.getFullYear() - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate();
+    return { time: time, day: day };
+  }
+
+  const enc = new TextEncoder();
+
+  function Writer(date) {
+    this.parts = [];
+    this.offset = 0;
+    this.entries = [];
+    this.stamp = dos(date);
+  }
+  // data: Blob, Uint8Array oder Text
+  Writer.prototype.add = async function (name, data) {
+    if (this.entries.length >= MAX_ENTRIES) throw new Error('Zu viele Einträge für eine einzelne ZIP-Datei.');
+    const blob = data instanceof Blob ? data : new Blob([typeof data === 'string' ? enc.encode(data) : data]);
+    const crc = crc32(new Uint8Array(await blob.arrayBuffer()));
+    const nameBytes = enc.encode(name);
+    const h = new Uint8Array(30);
+    const v = new DataView(h.buffer);
+    v.setUint32(0, 0x04034b50, true);
+    v.setUint16(4, 20, true);
+    v.setUint16(6, 0x0800, true);          // Namen sind UTF-8
+    v.setUint16(8, 0, true);               // unkomprimiert
+    v.setUint16(10, this.stamp.time, true);
+    v.setUint16(12, this.stamp.day, true);
+    v.setUint32(14, crc, true);
+    v.setUint32(18, blob.size, true);
+    v.setUint32(22, blob.size, true);
+    v.setUint16(26, nameBytes.length, true);
+    v.setUint16(28, 0, true);
+    this.entries.push({ name: nameBytes, crc: crc, size: blob.size, offset: this.offset });
+    this.parts.push(h, nameBytes, blob);
+    this.offset += 30 + nameBytes.length + blob.size;
+    if (this.offset > MAX_BYTES) throw new Error('Das Backup wäre grösser als 4 GB und passt nicht in eine einzelne ZIP-Datei.');
+  };
+  Writer.prototype.finish = function () {
+    const cdStart = this.offset;
+    let cdSize = 0;
+    const cd = [];
+    for (const e of this.entries) {
+      const h = new Uint8Array(46);
+      const v = new DataView(h.buffer);
+      v.setUint32(0, 0x02014b50, true);
+      v.setUint16(4, 20, true);
+      v.setUint16(6, 20, true);
+      v.setUint16(8, 0x0800, true);
+      v.setUint16(10, 0, true);
+      v.setUint16(12, this.stamp.time, true);
+      v.setUint16(14, this.stamp.day, true);
+      v.setUint32(16, e.crc, true);
+      v.setUint32(20, e.size, true);
+      v.setUint32(24, e.size, true);
+      v.setUint16(28, e.name.length, true);
+      v.setUint32(42, e.offset, true);
+      cd.push(h, e.name);
+      cdSize += 46 + e.name.length;
+    }
+    const end = new Uint8Array(22);
+    const ev = new DataView(end.buffer);
+    ev.setUint32(0, 0x06054b50, true);
+    ev.setUint16(8, this.entries.length, true);
+    ev.setUint16(10, this.entries.length, true);
+    ev.setUint32(12, cdSize, true);
+    ev.setUint32(16, cdStart, true);
+    return new Blob(this.parts.concat(cd, [end]), { type: 'application/zip' });
+  };
+
+  // file: Blob oder File. Liest nur Endverzeichnis und Inhaltsverzeichnis, die Einträge erst auf Anfrage.
+  async function open(file) {
+    const size = file.size;
+    if (size < 22) throw new Error('Die Datei ist keine ZIP-Datei (zu klein).');
+    const tailLen = Math.min(size, 65557);
+    const tail = new Uint8Array(await file.slice(size - tailLen, size).arrayBuffer());
+    let at = -1;
+    for (let i = tail.length - 22; i >= 0; i--) {
+      if (tail[i] === 0x50 && tail[i + 1] === 0x4b && tail[i + 2] === 0x05 && tail[i + 3] === 0x06) { at = i; break; }
+    }
+    if (at < 0) throw new Error('Die Datei ist keine gültige ZIP-Datei oder wurde beim Kopieren abgeschnitten.');
+    const ev = new DataView(tail.buffer, tail.byteOffset + at);
+    const total = ev.getUint16(10, true);
+    const cdSize = ev.getUint32(12, true);
+    const cdOffset = ev.getUint32(16, true);
+    if (total === 0xFFFF || cdSize === 0xFFFFFFFF || cdOffset === 0xFFFFFFFF) throw new Error('ZIP64-Dateien werden nicht unterstützt.');
+    if (cdOffset + cdSize > size) throw new Error('Die ZIP-Datei ist unvollständig (Inhaltsverzeichnis ausserhalb der Datei).');
+    const cd = new Uint8Array(await file.slice(cdOffset, cdOffset + cdSize).arrayBuffer());
+    const dv = new DataView(cd.buffer, cd.byteOffset, cd.byteLength);
+    const dec = new TextDecoder('utf-8');
+    const entries = [];
+    let p = 0;
+    for (let n = 0; n < total; n++) {
+      if (p + 46 > cd.length || dv.getUint32(p, true) !== 0x02014b50) throw new Error('Das Inhaltsverzeichnis der ZIP-Datei ist beschädigt.');
+      const flags = dv.getUint16(p + 8, true);
+      const method = dv.getUint16(p + 10, true);
+      const crc = dv.getUint32(p + 16, true);
+      const csize = dv.getUint32(p + 20, true);
+      const usize = dv.getUint32(p + 24, true);
+      const nl = dv.getUint16(p + 28, true);
+      const el = dv.getUint16(p + 30, true);
+      const cl = dv.getUint16(p + 32, true);
+      const off = dv.getUint32(p + 42, true);
+      const name = dec.decode(cd.subarray(p + 46, p + 46 + nl));
+      entries.push({ name: name, flags: flags, method: method, crc: crc, csize: csize, size: usize, offset: off });
+      p += 46 + nl + el + cl;
+    }
+    const byName = new Map();
+    entries.forEach(function (e) { byName.set(e.name, e); });
+
+    async function read(e) {
+      if (e.flags & 1) throw new Error('Verschlüsselte ZIP-Einträge werden nicht unterstützt.');
+      if (e.size > MAX_ENTRY || e.csize > MAX_ENTRY) throw new Error('Eintrag zu gross: ' + e.name);
+      const lh = new Uint8Array(await file.slice(e.offset, e.offset + 30).arrayBuffer());
+      const lv = new DataView(lh.buffer);
+      if (lh.length < 30 || lv.getUint32(0, true) !== 0x04034b50) throw new Error('Beschädigter Eintrag: ' + e.name);
+      const start = e.offset + 30 + lv.getUint16(26, true) + lv.getUint16(28, true);
+      if (start + e.csize > size) throw new Error('Die ZIP-Datei ist unvollständig: ' + e.name);
+      let bytes = new Uint8Array(await file.slice(start, start + e.csize).arrayBuffer());
+      if (e.method === 8) {
+        if (typeof DecompressionStream === 'undefined') throw new Error('Komprimierte ZIP-Einträge werden hier nicht unterstützt.');
+        const ds = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+        bytes = new Uint8Array(await new Response(ds).arrayBuffer());
+      } else if (e.method !== 0) {
+        throw new Error('Nicht unterstützte ZIP-Komprimierung (Methode ' + e.method + ').');
+      }
+      if (bytes.length !== e.size) throw new Error('Grösse stimmt nicht: ' + e.name);
+      if (crc32(bytes) !== e.crc) throw new Error('Prüfsumme stimmt nicht (Datei beschädigt): ' + e.name);
+      return bytes;
+    }
+    return {
+      entries: entries,
+      has: function (n) { return byName.has(n); },
+      entry: function (n) { return byName.get(n); },
+      read: read,
+      readName: async function (n) {
+        const e = byName.get(n);
+        if (!e) throw new Error('Fehlt im Backup: ' + n);
+        return read(e);
+      }
+    };
+  }
+
+  return { Writer: Writer, open: open, crc32: crc32 };
+})();
+
+if (typeof module !== 'undefined') module.exports = Zip;
+
+
+/* ===== backup.js ===== */
+// Backup und Restore.
+// Das Backup ist eine normale ZIP-Datei:
+//   LIESMICH.txt                          Beschreibung des Inhalts
+//   manifest.json                         Übersicht (Version, Datum, Artikelliste)
+//   articles/<id>/article.json            Metadaten, Text (HTML), Markierungen, Schlagwörter
+//   articles/<id>/images/<nr>.<endung>    die Bilder des Artikels
+const Backup = (function () {
+  const FORMAT = 'onlineartikel-archiv-backup';
+  const FORMAT_VERSION = 1;
+  const EXT = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/gif': 'gif', 'image/webp': 'webp', 'image/avif': 'avif', 'image/svg+xml': 'svg' };
+  const ID_RE = /^[A-Za-z0-9_-]{3,40}$/;
+  const PREFIX = 'Onlineartikel-Archiv-Backup-';
+  const dec = new TextDecoder('utf-8');
+  const KEY = 'oa-backup-v1';
+
+  const README = [
+    'Yves’ Onlineartikel Archiv – Backup',
+    '',
+    'Diese ZIP-Datei enthält alle gespeicherten Artikel mit Bildern, Markierungen und Schlagwörtern.',
+    'Sie lässt sich in der App unter «Sicherung» wieder einspielen.',
+    '',
+    'Aufbau:',
+    '  manifest.json                        Übersicht: Datum, App-Version, Liste der Artikel',
+    '  articles/<id>/article.json           Titel, Quelle, Text (HTML), Markierungen, Schlagwörter',
+    '  articles/<id>/images/<nr>.<endung>   Bilder des Artikels',
+    '',
+    'Die Datei ist nicht verschlüsselt. Wer Zugriff auf sie hat, kann alles lesen.',
+    ''
+  ].join('\n');
+
+  function pad(n) { return String(n).padStart(2, '0'); }
+  function fileName(d) {
+    d = d || new Date();
+    return PREFIX + d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + '-' + pad(d.getHours()) + pad(d.getMinutes()) + '.zip';
+  }
+
+  /* ---------- Merker für «Letztes Backup» ---------- */
+  function lastInfo() {
+    try { const v = JSON.parse(localStorage.getItem(KEY) || 'null'); return v && v.at ? v : null; } catch (e) { return null; }
+  }
+  function remember(info) {
+    try { localStorage.setItem(KEY, JSON.stringify(info)); } catch (e) { /* ohne Merker weiter */ }
+  }
+
+  /* ---------- Erstellen ---------- */
+  async function create(appVersion, onProgress) {
+    const metas = await Store.listArticles();
+    const w = new Zip.Writer(new Date());
+    const list = [];
+    let images = 0, hls = 0;
+    for (let n = 0; n < metas.length; n++) {
+      const ex = await Store.exportArticle(metas[n].id);
+      if (!ex) continue;
+      const files = ex.images.map(function (im) {
+        return { i: im.i, type: im.type, file: 'images/' + im.i + '.' + (EXT[im.type] || 'bin') };
+      });
+      const base = 'articles/' + ex.meta.id + '/';
+      await w.add(base + 'article.json', JSON.stringify({ meta: ex.meta, html: ex.html, highlights: ex.highlights, images: files }));
+      for (let k = 0; k < ex.images.length; k++) await w.add(base + files[k].file, ex.images[k].blob);
+      images += ex.images.length;
+      hls += ex.highlights.length;
+      list.push({ id: ex.meta.id, url: ex.meta.url, title: ex.meta.title, savedAt: ex.meta.savedAt, images: ex.images.length, highlights: ex.highlights.length });
+      if (onProgress) onProgress(n + 1, metas.length);
+    }
+    const manifest = {
+      format: FORMAT,
+      formatVersion: FORMAT_VERSION,
+      appVersion: appVersion,
+      createdAt: new Date().toISOString(),
+      counts: { articles: list.length, images: images, highlights: hls },
+      articles: list
+    };
+    await w.add('manifest.json', JSON.stringify(manifest, null, 1));
+    await w.add('LIESMICH.txt', README);
+    return { blob: w.finish(), manifest: manifest };
+  }
+
+  /* ---------- Weitergeben (Teilen-Menü) ---------- */
+  function plugin(name) {
+    const P = window.Capacitor && window.Capacitor.Plugins;
+    return P ? P[name] : null;
+  }
+  function toBase64(blob) {
+    return new Promise(function (resolve, reject) {
+      const r = new FileReader();
+      r.onload = function () { resolve(String(r.result).split(',')[1] || ''); };
+      r.onerror = function () { reject(r.error || new Error('Lesefehler')); };
+      r.readAsDataURL(blob);
+    });
+  }
+
+  // Alte Backup-Dateien im Zwischenspeicher der App entfernen. maxAge in ms (0 = alle).
+  async function cleanup(maxAge) {
+    const FS = plugin('Filesystem');
+    if (!FS || !Net.isNative()) return 0;
+    let n = 0;
+    try {
+      const r = await FS.readdir({ path: '', directory: 'CACHE' });
+      for (const f of (r.files || [])) {
+        const name = typeof f === 'string' ? f : f.name;
+        if (!name || name.indexOf(PREFIX) !== 0) continue;
+        const age = f && f.mtime ? Date.now() - f.mtime : Infinity;
+        if (maxAge && age < maxAge) continue;
+        await FS.deleteFile({ path: name, directory: 'CACHE' });
+        n++;
+      }
+    } catch (e) { /* Aufräumen ist nicht kritisch */ }
+    return n;
+  }
+
+  const CHUNK = 1024 * 1024;
+  // Ergebnis: 'share' (Teilen-Menü wurde geöffnet), 'cancelled' oder 'download' (nur im Browser)
+  async function deliver(blob, name, onProgress) {
+    const FS = plugin('Filesystem');
+    const SH = plugin('Share');
+    if (Net.isNative()) {
+      if (!FS || !SH) throw new Error('Die Teilen-Funktion ist in dieser App-Version nicht eingebaut (Plugin Filesystem oder Share fehlt).');
+      await cleanup(0);
+      for (let off = 0, first = true; off < blob.size; off += CHUNK, first = false) {
+        const data = await toBase64(blob.slice(off, Math.min(blob.size, off + CHUNK)));
+        if (first) await FS.writeFile({ path: name, data: data, directory: 'CACHE' });
+        else await FS.appendFile({ path: name, data: data, directory: 'CACHE' });
+        if (onProgress) onProgress(Math.min(blob.size, off + CHUNK), blob.size);
+      }
+      const st = await FS.stat({ path: name, directory: 'CACHE' });
+      if (st && typeof st.size === 'number' && st.size !== blob.size) {
+        throw new Error('Die Datei wurde nicht vollständig geschrieben (' + st.size + ' von ' + blob.size + ' Bytes).');
+      }
+      const u = await FS.getUri({ path: name, directory: 'CACHE' });
+      try {
+        await SH.share({ title: name, dialogTitle: 'Backup speichern unter …', url: u.uri });
+      } catch (e) {
+        if (/cancel|abgebrochen|dismiss/i.test((e && e.message) || '')) return 'cancelled';
+        throw e;
+      }
+      return 'share';
+    }
+    // Browser (Entwicklung/Test): normaler Download
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 15000);
+    return 'download';
+  }
+
+  /* ---------- Prüfen und Einspielen ---------- */
+  async function inspect(file) {
+    const zip = await Zip.open(file);
+    if (!zip.has('manifest.json')) throw new Error('Das ist keine Backup-Datei dieser App (manifest.json fehlt).');
+    let m;
+    try { m = JSON.parse(dec.decode(await zip.readName('manifest.json'))); }
+    catch (e) { throw new Error('Das Backup ist beschädigt: ' + e.message); }
+    if (!m || m.format !== FORMAT) throw new Error('Das ist keine Backup-Datei dieser App.');
+    if (!(m.formatVersion >= 1) || m.formatVersion > FORMAT_VERSION) {
+      throw new Error('Das Backup stammt aus einer neueren App-Version (Format ' + m.formatVersion + '). Bitte zuerst die App aktualisieren.');
+    }
+    if (!Array.isArray(m.articles)) throw new Error('Das Backup ist unvollständig (Artikelliste fehlt).');
+    m.articles = m.articles.filter(function (a) { return a && ID_RE.test(String(a.id)); });
+    return { zip: zip, manifest: m };
+  }
+
+  // Jeden Eintrag lesen und die Prüfsumme kontrollieren, dazu die Struktur jedes Artikels
+  async function verifyAll(zip, manifest, onProgress) {
+    const total = zip.entries.length;
+    for (let i = 0; i < total; i++) {
+      await zip.read(zip.entries[i]);
+      if (onProgress) onProgress(i + 1, total);
+    }
+    for (const a of manifest.articles) {
+      const path = 'articles/' + a.id + '/article.json';
+      if (!zip.has(path)) throw new Error('Im Backup fehlt der Artikel «' + (a.title || a.id) + '».');
+      let art;
+      try { art = JSON.parse(dec.decode(await zip.readName(path))); }
+      catch (e) { throw new Error('Der Artikel «' + (a.title || a.id) + '» ist im Backup beschädigt.'); }
+      if (!art || typeof art.html !== 'string' || !art.meta) throw new Error('Der Artikel «' + (a.title || a.id) + '» ist im Backup unvollständig.');
+    }
+    return { entries: total };
+  }
+
+  function plan(manifest, metas) {
+    const byId = new Map(metas.map(function (m) { return [m.id, m]; }));
+    const byUrl = new Map(metas.map(function (m) { return [m.url, m]; }));
+    const inBackup = new Set(manifest.articles.map(function (a) { return a.id; }));
+    const out = { total: manifest.articles.length, add: [], same: [], dupUrl: [], onlyLocal: [] };
+    manifest.articles.forEach(function (a) {
+      if (byId.has(a.id)) out.same.push(a);
+      else if (a.url && byUrl.has(a.url)) out.dupUrl.push(a);
+      else out.add.push(a);
+    });
+    metas.forEach(function (m) { if (!inBackup.has(m.id)) out.onlyLocal.push(m); });
+    return out;
+  }
+
+  function str(v, n) { return String(v == null ? '' : v).slice(0, n); }
+  function cleanTag(t) { return str(t, 200).replace(/\s+/g, ' ').trim().replace(/^#+/, '').slice(0, 40).trim(); }
+  function cleanMeta(m, id) {
+    m = m || {};
+    const tags = [];
+    const seen = {};
+    (Array.isArray(m.tags) ? m.tags : []).forEach(function (t) {
+      const c = cleanTag(t);
+      const k = Search.fold(c);
+      if (c && !seen[k] && tags.length < 20) { seen[k] = 1; tags.push(c); }
+    });
+    return {
+      id: id,
+      url: str(m.url, 2000),
+      finalUrl: str(m.finalUrl || m.url, 2000),
+      title: str(m.title, 300) || '(ohne Titel)',
+      byline: str(m.byline, 200),
+      site: str(m.site, 120),
+      lang: str(m.lang, 20),
+      dir: m.dir === 'rtl' ? 'rtl' : '',
+      published: str(m.published, 60),
+      excerpt: str(m.excerpt, 260),
+      savedAt: Number(m.savedAt) > 0 ? Number(m.savedAt) : Date.now(),
+      chars: Number(m.chars) > 0 ? Number(m.chars) : 0,
+      imageTotal: Number(m.imageTotal) > 0 ? Number(m.imageTotal) : 0,
+      imageSaved: Number(m.imageSaved) > 0 ? Number(m.imageSaved) : 0,
+      via: str(m.via, 40),
+      tags: tags
+    };
+  }
+  function cleanHighlights(list, articleId) {
+    const out = [];
+    (Array.isArray(list) ? list : []).forEach(function (h) {
+      if (!h || typeof h.exact !== 'string' || !h.exact) return;
+      const start = parseInt(h.start, 10), end = parseInt(h.end, 10);
+      if (!(start >= 0) || !(end > start)) return;
+      out.push({
+        id: ID_RE.test(String(h.id)) ? String(h.id) : Store.newId('h'),
+        articleId: articleId,
+        start: start,
+        end: end,
+        exact: str(h.exact, 5000),
+        prefix: str(h.prefix, 80),
+        suffix: str(h.suffix, 80),
+        created: Number(h.created) > 0 ? Number(h.created) : Date.now()
+      });
+    });
+    return out;
+  }
+
+  async function readArticle(zip, id, withImages) {
+    const art = JSON.parse(dec.decode(await zip.readName('articles/' + id + '/article.json')));
+    const meta = cleanMeta(art.meta, id);
+    if (!/^(https?:\/\/|text:)/i.test(meta.url)) meta.url = meta.finalUrl = 'https://unbekannt.invalid/' + id;
+    const html = String(art.html || '').slice(0, 30 * 1024 * 1024);
+    const images = [];
+    let missing = 0;
+    if (withImages) {
+      for (const im of (Array.isArray(art.images) ? art.images : [])) {
+        const i = parseInt(im && im.i, 10);
+        const type = im && im.type;
+        if (!(i >= 0) || !EXT[type]) { missing++; continue; }
+        const path = 'articles/' + id + '/images/' + i + '.' + EXT[type];
+        if (!zip.has(path)) { missing++; continue; }
+        const bytes = await zip.readName(path);
+        if (Net.sniff(bytes) !== type) { missing++; continue; }
+        images.push({ i: i, type: type, blob: new Blob([bytes], { type: type }) });
+      }
+      meta.imageSaved = images.length;
+    }
+    const text = Sanitize.run(html, { mode: 'render' }).el.textContent;
+    return { meta: meta, html: html, text: text, highlights: cleanHighlights(art.highlights, id), images: images, missingImages: missing };
+  }
+
+  function unionTags(a, b) {
+    const out = (a || []).slice();
+    const seen = {};
+    out.forEach(function (t) { seen[Search.fold(t)] = 1; });
+    (b || []).forEach(function (t) {
+      const k = Search.fold(t);
+      if (!seen[k] && out.length < 20) { seen[k] = 1; out.push(t); }
+    });
+    return out;
+  }
+
+  // mode: 'merge' (nur ergänzen) oder 'replace' (Bestand durch Backup ersetzen).
+  // Beim Ersetzen wird zuerst alles aus dem Backup eingespielt und erst danach gelöscht, was nur lokal existiert.
+  async function restore(opts, onProgress) {
+    const zip = opts.zip, manifest = opts.manifest, mode = opts.mode;
+    const local = opts.metas;
+    const byId = new Map(local.map(function (m) { return [m.id, m]; }));
+    const byUrl = new Map(local.map(function (m) { return [m.url, m]; }));
+    const res = { added: 0, merged: 0, replaced: 0, skippedUrl: 0, deleted: 0, highlightsAdded: 0, tagsAdded: 0, missingImages: 0 };
+    const list = manifest.articles;
+    for (let n = 0; n < list.length; n++) {
+      const a = list[n];
+      const have = byId.get(a.id);
+      if (mode === 'merge') {
+        if (have) {
+          const rec = await readArticle(zip, a.id, false);
+          const tags = unionTags(have.tags, rec.meta.tags);
+          res.tagsAdded += tags.length - (have.tags || []).length;
+          const r = await Store.mergeInto(a.id, tags, rec.highlights);
+          res.highlightsAdded += r.highlights;
+          res.merged++;
+        } else if (a.url && byUrl.has(a.url)) {
+          res.skippedUrl++;
+        } else {
+          const rec = await readArticle(zip, a.id, true);
+          await Store.importArticle(rec, false);
+          res.added++;
+          res.highlightsAdded += rec.highlights.length;
+          res.missingImages += rec.missingImages;
+        }
+      } else {
+        const rec = await readArticle(zip, a.id, true);
+        await Store.importArticle(rec, true);
+        if (have) res.replaced++; else res.added++;
+        res.highlightsAdded += rec.highlights.length;
+        res.missingImages += rec.missingImages;
+      }
+      if (onProgress) onProgress(n + 1, list.length);
+    }
+    if (mode === 'replace') {
+      const keep = new Set(list.map(function (a) { return a.id; }));
+      for (const m of local) {
+        if (keep.has(m.id)) continue;
+        await Store.deleteArticle(m.id);
+        res.deleted++;
+      }
+    }
+    return res;
+  }
+
+  return {
+    fileName: fileName, create: create, deliver: deliver, cleanup: cleanup, lastInfo: lastInfo, remember: remember,
+    inspect: inspect, verifyAll: verifyAll, plan: plan, restore: restore, FORMAT: FORMAT
+  };
+})();
+
+if (typeof module !== 'undefined') module.exports = Backup;
+
+
+/* ===== app.js ===== */
+(function () {
+  'use strict';
+
+  var VERSION = '0.6.0';
+
+  /* ---------- Hilfen ---------- */
+  var logLines = [];
+  function log(msg) {
+    var t = new Date().toTimeString().slice(0, 8);
+    logLines.push(t + ' ' + msg);
+    if (logLines.length > 80) logLines.shift();
+  }
+  window.addEventListener('error', function (e) { log('Fehler: ' + (e.message || e)); });
+  window.addEventListener('unhandledrejection', function (e) {
+    log('Unbehandelt: ' + (e.reason && e.reason.message ? e.reason.message : e.reason));
+  });
+
+  // Elemente bauen ohne innerHTML
+  function h(tag, props) {
+    var el = document.createElement(tag);
+    if (props) {
+      Object.keys(props).forEach(function (k) {
+        if (k === 'class') el.className = props[k];
+        else if (k === 'text') el.textContent = props[k];
+        else if (k.slice(0, 2) === 'on') el.addEventListener(k.slice(2), props[k]);
+        else el.setAttribute(k, props[k]);
+      });
+    }
+    for (var i = 2; i < arguments.length; i++) {
+      var c = arguments[i];
+      if (c == null || c === false) continue;
+      el.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
+    }
+    return el;
+  }
+  function $(id) { return document.getElementById(id); }
+  function clear(el) { while (el.firstChild) el.removeChild(el.firstChild); }
+
+  function fmtDate(ts) {
+    try { return new Date(ts).toLocaleDateString('de-CH', { day: 'numeric', month: 'short', year: 'numeric' }); }
+    catch (e) { return ''; }
+  }
+  function fmtBytes(n) {
+    if (n == null) return '–';
+    if (n < 1024 * 1024) return Math.round(n / 1024) + ' KB';
+    if (n < 1024 * 1024 * 1024) return (n / 1024 / 1024).toFixed(1) + ' MB';
+    return (n / 1024 / 1024 / 1024).toFixed(2) + ' GB';
+  }
+
+  var TRACKING = /^(utm_|fbclid$|gclid$|mc_cid$|mc_eid$|igshid$|ref_src$)/i;
+  function normalizeUrl(u) {
+    var x = new URL(u);
+    x.hash = '';
+    Array.from(x.searchParams.keys()).forEach(function (k) { if (TRACKING.test(k)) x.searchParams.delete(k); });
+    return x.href.replace(/\?$/, '');
+  }
+  // Aus beliebigem Text den ersten Link holen; reine Domain bekommt https://
+  function extractUrl(text) {
+    var s = String(text || '').trim();
+    var m = s.match(/https?:\/\/[^\s<>"'\]\)]+/i);
+    var u = m ? m[0] : '';
+    if (!u && /^[\w-]+(\.[\w-]+)+(\/\S*)?$/.test(s)) u = 'https://' + s;
+    if (!u) return '';
+    u = u.replace(/[.,;:!?]+$/, '');
+    u = u.replace(/^http:\/\//i, 'https://'); // Klartext-Verkehr ist auf Android ohnehin gesperrt
+    try { return new URL(u).href; } catch (e) { return ''; }
+  }
+
+  /* ---------- Ansichten ---------- */
+  var views = { list: $('view-list'), reader: $('view-reader'), info: $('view-info'), tags: $('view-tags'), backup: $('view-backup'), note: $('view-note') };
+  var current = null; // { meta, urls: [] }
+  function show(name) {
+    Object.keys(views).forEach(function (k) { views[k].hidden = k !== name; });
+    $('bar').hidden = name !== 'reader';
+    window.scrollTo(0, 0);
+  }
+
+  /* ---------- Status ---------- */
+  function setStatus(text, kind, action) {
+    var el = $('status');
+    clear(el);
+    el.className = 'status' + (kind ? ' ' + kind : '');
+    el.hidden = !text;
+    if (!text) return;
+    el.appendChild(h('span', { text: text }));
+    if (action) el.appendChild(h('button', { class: 'small', text: action.label, onclick: action.run }));
+  }
+
+  /* ---------- Speicher im Arbeitsspeicher: Artikel, Schlagwörter, Suchindex ---------- */
+  var metas = [];          // alle Artikel (Metadaten), neueste zuerst
+  var metaById = {};
+  var searchItems = {};    // id -> gefalteter Suchindex
+  var texts = {};          // id -> Klartext im Original (für Ausschnitte)
+  var hlByArticle = {};    // id -> Texte der Markierungen
+  var filter = { q: '', tags: [] }; // tags: gefaltete Schlüssel
+
+  function foldKey(t) { return Search.fold(t).replace(/\s+/g, ' ').trim(); }
+  function reindex(id) {
+    var m = metaById[id];
+    if (!m) { delete searchItems[id]; return; }
+    searchItems[id] = Search.buildItem(m, texts[id] || '', hlByArticle[id] || []);
+  }
+  async function backfillTexts() {
+    var ids = await Store.idsWithoutText();
+    if (!ids.length) return;
+    log('Suchtext wird für ' + ids.length + ' ältere Artikel nachgetragen');
+    for (var i = 0; i < ids.length; i++) {
+      var html = await Store.getBodyHtml(ids[i]);
+      if (html == null) continue;
+      var res = Sanitize.run(html, { mode: 'render' });
+      await Store.putText(ids[i], res.el.textContent);
+    }
+  }
+  async function loadAll() {
+    metas = await Store.listArticles();
+    metaById = {};
+    metas.forEach(function (m) { if (!m.tags) m.tags = []; metaById[m.id] = m; });
+    texts = {};
+    (await Store.allTexts()).forEach(function (t) { texts[t.id] = t.text; });
+    hlByArticle = {};
+    (await Store.allHighlights()).forEach(function (x) { (hlByArticle[x.articleId] = hlByArticle[x.articleId] || []).push(x.exact); });
+    searchItems = {};
+    metas.forEach(function (m) { reindex(m.id); });
+  }
+  function addToMemory(meta, text) {
+    meta.tags = meta.tags || [];
+    metas.unshift(meta);
+    metaById[meta.id] = meta;
+    texts[meta.id] = text;
+    hlByArticle[meta.id] = [];
+    reindex(meta.id);
+  }
+  function removeFromMemory(id) {
+    metas = metas.filter(function (m) { return m.id !== id; });
+    delete metaById[id]; delete texts[id]; delete hlByArticle[id]; delete searchItems[id];
+  }
+
+  function allTags() {
+    var map = {};
+    metas.forEach(function (m) {
+      (m.tags || []).forEach(function (t) {
+        var k = foldKey(t);
+        if (!map[k]) map[k] = { name: t, key: k, count: 0 };
+        map[k].count++;
+      });
+    });
+    return Object.keys(map).map(function (k) { return map[k]; })
+      .sort(function (a, b) { return b.count - a.count || a.name.localeCompare(b.name, 'de'); });
+  }
+  function cleanTag(raw) {
+    return String(raw || '').replace(/\s+/g, ' ').trim().replace(/^#+/, '').slice(0, 40).trim();
+  }
+  // Gibt es das Schlagwort schon (auch in anderer Schreibweise), wird dessen Schreibweise übernommen
+  function canonicalTag(raw) {
+    var t = cleanTag(raw);
+    if (!t) return '';
+    var k = foldKey(t);
+    var ex = allTags().find(function (x) { return x.key === k; });
+    return ex ? ex.name : t;
+  }
+
+  /* ---------- Artikelliste ---------- */
+  function visibleList() {
+    var tokens = Search.tokenize(filter.q);
+    var out = [];
+    metas.forEach(function (m) {
+      if (filter.tags.length) {
+        var keys = (m.tags || []).map(foldKey);
+        if (!filter.tags.every(function (k) { return keys.indexOf(k) !== -1; })) return;
+      }
+      if (tokens.length) {
+        var r = Search.match(searchItems[m.id] || Search.buildItem(m, '', []), tokens);
+        if (!r) return;
+        out.push({ m: m, r: r });
+      } else out.push({ m: m, r: null });
+    });
+    if (tokens.length) out.sort(function (a, b) { return b.r.score - a.r.score || b.m.savedAt - a.m.savedAt; });
+    return { items: out, tokens: tokens };
+  }
+
+  function snippetNode(entry, tokens) {
+    var r = entry.r;
+    if (!r) return null;
+    if (r.inHl) {
+      var hl = (hlByArticle[entry.m.id] || []).find(function (t) {
+        var f = Search.fold(t);
+        return tokens.some(function (k) { return f.indexOf(k) !== -1; });
+      });
+      var s1 = hl && Search.snippet(hl, tokens, 90);
+      if (s1) return h('span', { class: 'card-snippet' }, h('span', { class: 'lbl', text: 'Markierung:' }), s1.before, h('mark', { text: s1.match }), s1.after);
+    }
+    if (r.inText) {
+      var s2 = Search.snippet(texts[entry.m.id] || '', tokens, 80);
+      if (s2) return h('span', { class: 'card-snippet' }, h('span', { class: 'lbl', text: 'Text:' }), s2.before, h('mark', { text: s2.match }), s2.after);
+    }
+    return null;
+  }
+
+  function renderTagFilter() {
+    var row = $('tag-filter');
+    clear(row);
+    allTags().forEach(function (t) {
+      var on = filter.tags.indexOf(t.key) !== -1;
+      row.appendChild(h('button', { class: 'tag' + (on ? ' on' : ''), 'aria-pressed': on ? 'true' : 'false', 'data-key': t.key, onclick: function () { toggleTagFilter(t.key); } },
+        t.name, h('span', { class: 'n', text: String(t.count) })));
+    });
+  }
+  function toggleTagFilter(key) {
+    var i = filter.tags.indexOf(key);
+    if (i === -1) filter.tags.push(key); else filter.tags.splice(i, 1);
+    renderList();
+  }
+
+  function renderList() {
+    if (typeof renderBackupNote === 'function') renderBackupNote();
+    var ul = $('articles');
+    clear(ul);
+    // Filter auf Schlagwörter, die es nicht mehr gibt, fallen lassen
+    var existing = allTags().map(function (t) { return t.key; });
+    filter.tags = filter.tags.filter(function (k) { return existing.indexOf(k) !== -1; });
+
+    var v = visibleList();
+    var active = !!(Search.tokenize(filter.q).length || filter.tags.length);
+    $('count').textContent = metas.length ? '(' + metas.length + ')' : '';
+    $('empty').hidden = metas.length > 0;
+    $('reset-filter').hidden = !(filter.q.trim() || filter.tags.length);
+    $('result-info').textContent = !metas.length ? '' : active
+      ? (v.items.length ? v.items.length + ' von ' + metas.length + ' Artikeln' : 'Keine Treffer')
+      : '';
+    renderTagFilter();
+
+    v.items.forEach(function (entry) {
+      var a = entry.m;
+      var meta = [a.site, fmtDate(a.savedAt)].filter(Boolean).join(' · ');
+      var n = (hlByArticle[a.id] || []).length;
+      var chips = [];
+      if (n) chips.push(n + (n === 1 ? ' Markierung' : ' Markierungen'));
+      if (a.imageTotal) chips.push(a.imageSaved + '/' + a.imageTotal + ' Bilder');
+      var snip = snippetNode(entry, v.tokens);
+      var card = h('button', { class: 'card', 'data-id': a.id, onclick: function () { openArticle(a.id, true, filter.q); } },
+        h('span', { class: 'card-meta', text: meta }),
+        h('span', { class: 'card-title', text: a.title }),
+        (a.tags && a.tags.length) ? h('span', { class: 'card-tags', text: a.tags.join(' · ') }) : null,
+        snip || (a.excerpt ? h('span', { class: 'card-excerpt', text: a.excerpt }) : null),
+        chips.length ? h('span', { class: 'card-chips', text: chips.join(' · ') }) : null
+      );
+      ul.appendChild(h('li', null, card));
+    });
+  }
+
+  /* ---------- Speichern ---------- */
+  var queue = [];
+  var busy = false;
+  function enqueue(raw) {
+    queue.push(raw);
+    pump();
+  }
+  async function pump() {
+    if (busy) return;
+    busy = true;
+    $('save').disabled = true;
+    while (queue.length) {
+      var raw = queue.shift();
+      try { await saveFromText(raw); }
+      catch (e) {
+        log('Speichern fehlgeschlagen: ' + (e && e.message));
+        if (e && e.detail) log(e.detail);
+        var failedUrl = extractUrl(raw);
+        setStatus(((e && e.message) || 'Speichern fehlgeschlagen.') + (failedUrl ? ' Du kannst den Text auch selbst einfügen.' : ''), 'bad',
+          failedUrl ? { label: 'Text einfügen', run: function () { openNote({ src: failedUrl }); } } : null);
+      }
+    }
+    busy = false;
+    $('save').disabled = false;
+  }
+
+  async function mapLimit(items, limit, fn) {
+    var results = new Array(items.length);
+    var next = 0;
+    async function worker() {
+      while (true) {
+        var i = next++;
+        if (i >= items.length) return;
+        results[i] = await fn(items[i], i);
+      }
+    }
+    var workers = [];
+    for (var w = 0; w < Math.min(limit, items.length); w++) workers.push(worker());
+    await Promise.all(workers);
+    return results;
+  }
+
+  var MAX_IMAGES = 60;
+  var MAX_TOTAL = 40 * 1024 * 1024;
+
+  async function saveFromText(raw) {
+    var url = extractUrl(raw);
+    if (!url) throw new Error('Kein Link erkannt. Ein Link beginnt mit https://');
+    var key = normalizeUrl(url);
+    var dup = await Store.findByUrl(key);
+    if (dup) return alreadySaved(dup);
+
+    setStatus('Lade Seite …', 'busy');
+    log('Lade ' + url);
+    var page;
+    try {
+      page = await Net.getText(url);
+    } catch (e) {
+      if (!(e && e.viaBrowser && Net.browserAvailable())) throw e;
+      if (e.detail) log(e.detail);
+      log('Wechsle in die Browser-Ansicht (' + (e.challenge ? 'Prüfseite erkannt' : 'Fehler ' + e.status) + ')');
+      setStatus('Die Seite verlangt eine Browser-Prüfung. Sie wird jetzt in einer Browser-Ansicht geöffnet; bitte kurz warten …', 'busy');
+      page = await Net.getTextViaBrowser(url, function (st) { log('Browser-Ansicht: ' + st); });
+      log('Browser-Ansicht lieferte ' + page.html.length + ' Zeichen von ' + page.url);
+    }
+    var finalKey = normalizeUrl(page.url || url);
+    if (finalKey !== key) {
+      var dup2 = await Store.findByUrl(finalKey);
+      if (dup2) return alreadySaved(dup2);
+    }
+
+    setStatus('Bereite Text auf …', 'busy');
+    var art = Extract.extract(page.html, page.url || url);
+    log('Text über ' + art.via + ': ' + art.text.length + ' Zeichen, ' + art.images.length + ' Bilder');
+
+    var id = Store.newId('a');
+    var urls = art.images.slice(0, MAX_IMAGES);
+    var done = 0, total = 0, failed = 0, reasons = {};
+    var saved = [];
+    if (urls.length) setStatus('Lade Bilder 0/' + urls.length + ' …', 'busy');
+    await mapLimit(urls, 4, async function (u, i) {
+      try {
+        var r;
+        if (u.slice(0, 5) === 'data:') {
+          var bytes = Net.b64ToBytes(u);
+          var type = Net.sniff(bytes);
+          if (!type) throw new Error('Format unbekannt');
+          r = { blob: new Blob([bytes], { type: type }), type: type };
+        } else {
+          r = await Net.getImage(u, page.url || url);
+        }
+        if (total + r.blob.size > MAX_TOTAL) throw new Error('Speichergrenze für diesen Artikel erreicht');
+        total += r.blob.size;
+        saved.push({ i: i, type: r.type, blob: r.blob });
+      } catch (e) {
+        failed++;
+        var why = (e && e.message) || 'Fehler';
+        reasons[why] = (reasons[why] || 0) + 1;
+        log('Bild ' + i + ' nicht geladen: ' + why);
+      }
+      done++;
+      setStatus('Lade Bilder ' + done + '/' + urls.length + ' …', 'busy');
+    });
+
+    var meta = {
+      id: id,
+      url: key,
+      finalUrl: page.url || url,
+      title: art.title,
+      byline: art.byline,
+      site: art.site,
+      lang: art.lang,
+      dir: art.dir,
+      published: art.published,
+      excerpt: art.excerpt,
+      savedAt: Date.now(),
+      chars: art.text.length,
+      imageTotal: art.images.length,
+      imageSaved: saved.length,
+      via: art.via,
+      tags: []
+    };
+    await Store.saveArticle(meta, art.html, saved, art.text);
+    log('Gespeichert ' + id + ' mit ' + saved.length + ' Bildern');
+    addToMemory(meta, art.text);
+    renderList();
+    var note = '';
+    if (art.images.length > urls.length) note = ' (nur die ersten ' + MAX_IMAGES + ' Bilder)';
+    if (failed) {
+      var top = Object.keys(reasons).sort(function (a, b) { return reasons[b] - reasons[a]; })[0];
+      note += ' · ' + failed + ' Bild' + (failed === 1 ? '' : 'er') + ' nicht geladen (' + top + ')';
+    }
+    setStatus('Gespeichert: ' + meta.title + note, failed ? 'warn' : 'ok', { label: 'Öffnen', run: function () { openArticle(id, true); } });
+    $('url').value = '';
+  }
+
+  function alreadySaved(rec) {
+    setStatus('Schon gespeichert: ' + rec.title, 'warn', { label: 'Öffnen', run: function () { openArticle(rec.id, true); } });
+    $('url').value = '';
+  }
+
+  /* ---------- Leseansicht ---------- */
+  var root = $('body');
+  var markBtn = $('mark');
+  var selLabel = $('sel');
+  var bar = $('bar');
+  var hasApi = typeof CSS !== 'undefined' && CSS.highlights && typeof Highlight !== 'undefined';
+  var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var items = [];
+  var resolved = [];
+
+  function revokeUrls() {
+    if (current && current.urls) current.urls.forEach(function (u) { URL.revokeObjectURL(u); });
+  }
+
+  async function openArticle(id, push, q) {
+    try {
+      var rec = await Store.getArticle(id);
+      if (!rec) { setStatus('Artikel nicht gefunden.', 'bad'); return; }
+      var imgs = await Store.getImages(id);
+      revokeUrls();
+      current = { meta: metaById[id] || rec.meta, urls: [], q: q || '' };
+      if (!current.meta.tags) current.meta.tags = [];
+      hitsOn = true;
+      var m = current.meta;
+
+      $('r-title').textContent = m.title;
+      var parts = [m.site, m.byline, fmtDate(m.savedAt)].filter(Boolean);
+      $('r-meta').textContent = parts.join(' · ');
+      var link = $('r-orig');
+      var orig = m.finalUrl || m.url;
+      var isWeb = /^https?:\/\//i.test(orig);
+      link.hidden = !isWeb;
+      link.setAttribute('href', isWeb ? orig : '#');
+      link.setAttribute('rel', 'noopener noreferrer');
+      link.setAttribute('target', '_blank');
+      root.dir = m.dir || 'auto';
+      if (m.lang) root.lang = m.lang; else root.removeAttribute('lang');
+
+      clear(root);
+      var res = Sanitize.run(rec.html, { mode: 'render', base: isWeb ? orig : undefined });
+      while (res.el.firstChild) root.appendChild(res.el.firstChild);
+      var byIndex = {};
+      imgs.forEach(function (im) { byIndex[im.i] = im; });
+      root.querySelectorAll('img[data-i]').forEach(function (img) {
+        var im = byIndex[img.getAttribute('data-i')];
+        if (im) {
+          var u = URL.createObjectURL(im.blob);
+          current.urls.push(u);
+          img.decoding = 'async';
+          img.src = u;
+        } else {
+          var ph = h('span', { class: 'noimg', role: 'img', 'aria-label': img.getAttribute('alt') || 'Bild nicht gespeichert' });
+          img.replaceWith(ph);
+        }
+      });
+
+      items = await Store.highlightsOf(id);
+      show('reader');
+      $('tag-input').value = '';
+      tagMsg('');
+      renderReaderTags();
+      render();
+      scrollToFirstHit();
+      resetDelete();
+      if (push) history.pushState({ v: 'reader', id: id, q: current.q }, '');
+    } catch (e) {
+      log('Öffnen fehlgeschlagen: ' + (e && e.message));
+      setStatus('Artikel lässt sich nicht öffnen: ' + (e && e.message), 'bad');
+    }
+  }
+
+  function closeReader() {
+    revokeUrls();
+    current = null;
+    clearPaint();
+    clear(root);
+    items = [];
+    show('list');
+    renderList();
+  }
+
+  function textOffset(node, offset) {
+    var r = document.createRange();
+    r.selectNodeContents(root);
+    r.setEnd(node, offset);
+    return r.toString().length;
+  }
+  function rangeAt(s, e) {
+    var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    var pos = 0, startNode, startOff, endNode, endOff, n;
+    while ((n = walker.nextNode())) {
+      var len = n.nodeValue.length;
+      if (startNode === undefined && s < pos + len) { startNode = n; startOff = s - pos; }
+      if (startNode !== undefined && e <= pos + len) { endNode = n; endOff = e - pos; break; }
+      pos += len;
+    }
+    if (!startNode || !endNode) return null;
+    var r = document.createRange();
+    r.setStart(startNode, startOff);
+    r.setEnd(endNode, endOff);
+    return r;
+  }
+  function wrapRange(range, cls) {
+    var scope = range.commonAncestorContainer;
+    if (scope.nodeType === 3) scope = scope.parentNode;
+    var w = document.createTreeWalker(scope, NodeFilter.SHOW_TEXT);
+    var nodes = [], n;
+    while ((n = w.nextNode())) if (range.intersectsNode(n)) nodes.push(n);
+    nodes.forEach(function (node) {
+      var r = document.createRange();
+      r.selectNodeContents(node);
+      if (node === range.startContainer) r.setStart(node, range.startOffset);
+      if (node === range.endContainer) r.setEnd(node, range.endOffset);
+      if (r.collapsed) return;
+      var mk = document.createElement('mark');
+      mk.className = cls || 'hl';
+      r.surroundContents(mk);
+    });
+  }
+  function clearPaint() {
+    if (hasApi) { CSS.highlights.delete('markierung'); CSS.highlights.delete('treffer'); }
+    else {
+      root.querySelectorAll('mark.hl, mark.hit').forEach(function (mk) {
+        var p = mk.parentNode;
+        while (mk.firstChild) p.insertBefore(mk.firstChild, mk);
+        p.removeChild(mk);
+        p.normalize();
+      });
+    }
+  }
+  function paint(found) {
+    if (hasApi) {
+      if (!found.length) return;
+      var hl = new Highlight();
+      found.forEach(function (f) {
+        var r = rangeAt(f.a.start, f.a.end);
+        if (r) hl.add(r);
+      });
+      CSS.highlights.set('markierung', hl);
+    } else {
+      found.forEach(function (f) {
+        var r = rangeAt(f.a.start, f.a.end);
+        if (r) wrapRange(r);
+      });
+    }
+  }
+
+  function render() {
+    var text = root.textContent;
+    resolved = items.map(function (it) { return { h: it, a: Anchor.anchor(text, it) }; });
+    clearPaint();
+    paint(resolved.filter(function (x) { return x.a; }));
+    paintHits();
+    renderHighlights();
+  }
+
+  /* Suchtreffer im geöffneten Artikel */
+  var hitsOn = true;
+  var firstHit = null;
+  function paintHits() {
+    firstHit = null;
+    var bar = $('hit-bar');
+    var tokens = (current && current.q) ? Search.tokenize(current.q) : [];
+    if (!tokens.length || !hitsOn) { bar.hidden = true; return; }
+    var occ = Search.occurrences(root.textContent, tokens, 400);
+    $('hit-text').textContent = occ.length
+      ? 'Gefunden: ' + occ.length + (occ.length === 1 ? ' Stelle' : ' Stellen') + ' für «' + current.q.trim() + '»'
+      : 'Im Text keine Stelle für «' + current.q.trim() + '» (Treffer liegt in Titel, Schlagwort oder Markierung)';
+    bar.hidden = false;
+    if (!occ.length) return;
+    if (hasApi) {
+      var hl = new Highlight();
+      occ.forEach(function (o) { var r = rangeAt(o[0], o[1]); if (r) hl.add(r); });
+      CSS.highlights.set('treffer', hl);
+    } else {
+      occ.forEach(function (o) { var r = rangeAt(o[0], o[1]); if (r) wrapRange(r, 'hit'); });
+    }
+    firstHit = occ[0];
+  }
+  function scrollToFirstHit() {
+    if (!firstHit) return;
+    var r = rangeAt(firstHit[0], firstHit[1]);
+    if (!r) return;
+    var top = r.getBoundingClientRect().top + window.scrollY - 160;
+    window.scrollTo({ top: Math.max(0, top), behavior: 'auto' });
+  }
+  $('hit-off').addEventListener('click', function () { hitsOn = false; render(); });
+
+  function twoStep(btn, idleLabel, action) {
+    var timer = null;
+    function reset() {
+      if (timer) clearTimeout(timer);
+      timer = null;
+      btn.textContent = idleLabel;
+      btn.classList.remove('confirm');
+    }
+    btn.addEventListener('click', function () {
+      if (timer) { reset(); action(); }
+      else {
+        btn.textContent = 'Sicher? Nochmal tippen';
+        btn.classList.add('confirm');
+        timer = setTimeout(reset, 3000);
+      }
+    });
+    return reset;
+  }
+
+  function syncHl() {
+    if (!current) return;
+    hlByArticle[current.meta.id] = items.map(function (it) { return it.exact; });
+    reindex(current.meta.id);
+  }
+
+  function renderHighlights() {
+    var q = $('q').value.trim().toLowerCase();
+    var ul = $('hl-list');
+    clear(ul);
+    var shown = resolved.filter(function (x) { return !q || x.h.exact.toLowerCase().indexOf(q) !== -1; });
+    $('hl-count').textContent = resolved.length ? '(' + resolved.length + ')' : '';
+    var empty = $('hl-empty');
+    empty.hidden = shown.length > 0;
+    empty.textContent = resolved.length
+      ? 'Keine Markierung enthält diesen Suchbegriff.'
+      : 'Noch keine Markierung. Wähle im Text eine Stelle aus und tippe unten auf «Markieren».';
+    shown.forEach(function (x) {
+      var showBtn = h('button', { text: 'Zeigen' });
+      if (!x.a) showBtn.disabled = true;
+      showBtn.addEventListener('click', function () {
+        var r = x.a && rangeAt(x.a.start, x.a.end);
+        if (!r) return;
+        var top = r.getBoundingClientRect().top + window.scrollY - 140;
+        window.scrollTo({ top: Math.max(0, top), behavior: reduce ? 'auto' : 'smooth' });
+      });
+      var del = h('button', { text: 'Löschen' });
+      twoStep(del, 'Löschen', async function () {
+        await Store.deleteHighlight(x.h.id);
+        items = items.filter(function (it) { return it.id !== x.h.id; });
+        syncHl();
+        render();
+      });
+      ul.appendChild(h('li', { class: 'item' },
+        h('div', { class: 'quote', text: x.h.exact }),
+        h('div', { class: 'item-foot' },
+          h('span', { class: 'how' + (x.a ? '' : ' lost'), text: x.a ? 'Gefunden über: ' + x.a.how : 'Im Text nicht mehr auffindbar' }),
+          h('span', { class: 'actions' }, showBtn, del))));
+    });
+  }
+
+  /* Auswahl */
+  var pending = null;
+  var barTouched = false;
+  var doneTimer = null;
+  function setPending(p) {
+    pending = p;
+    markBtn.disabled = !p;
+    if (doneTimer) return;
+    selLabel.className = 'label';
+    selLabel.textContent = p ? (p.e - p.s) + ' Zeichen ausgewählt' : 'Text auswählen, dann markieren';
+  }
+  document.addEventListener('selectionchange', function () {
+    if (views.reader.hidden) return;
+    var sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0 || sel.isCollapsed) { if (!barTouched) setPending(null); return; }
+    var r = sel.getRangeAt(0);
+    if (!root.contains(r.commonAncestorContainer)) { if (!barTouched) setPending(null); return; }
+    var text = root.textContent;
+    var se = Anchor.trimRange(text, textOffset(r.startContainer, r.startOffset), textOffset(r.endContainer, r.endOffset));
+    if (se[1] - se[0] < 2) { if (!barTouched) setPending(null); return; }
+    setPending({ s: se[0], e: se[1] });
+  });
+  function touch() { barTouched = true; setTimeout(function () { barTouched = false; }, 700); }
+  bar.addEventListener('pointerdown', function (e) { touch(); e.preventDefault(); });
+  bar.addEventListener('mousedown', function (e) { e.preventDefault(); });
+
+  markBtn.addEventListener('click', async function () {
+    if (!pending || !current) return;
+    var text = root.textContent;
+    var sel = Anchor.makeSelector(text, pending.s, pending.e);
+    var dup = items.some(function (it) { return it.start === sel.start && it.end === sel.end && it.exact === sel.exact; });
+    if (!dup) {
+      sel.id = Store.newId('h');
+      sel.articleId = current.meta.id;
+      sel.created = Date.now();
+      await Store.putHighlight(sel);
+      items.push(sel);
+      syncHl();
+    }
+    var s = window.getSelection();
+    if (s) s.removeAllRanges();
+    pending = null;
+    markBtn.disabled = true;
+    render();
+    selLabel.className = 'label done';
+    selLabel.textContent = dup ? 'Schon markiert' : 'Markiert';
+    if (doneTimer) clearTimeout(doneTimer);
+    doneTimer = setTimeout(function () { doneTimer = null; setPending(pending); }, 1600);
+  });
+  $('q').addEventListener('input', renderHighlights);
+
+  // Artikel löschen (zweistufig)
+  var resetDelete = twoStep($('del-article'), 'Artikel löschen', async function () {
+    if (!current) return;
+    var id = current.meta.id;
+    await Store.deleteArticle(id);
+    removeFromMemory(id);
+    log('Artikel gelöscht ' + id);
+    history.back();
+  });
+
+  /* ---------- Eigener Text ---------- */
+  var MAX_NOTE = 2 * 1024 * 1024;
+  function escHtml(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+  function noteHtml(text) {
+    return text.split(/\n[ \t]*\n+/).map(function (p) { return p.trim(); }).filter(Boolean).map(function (p) {
+      return '<p>' + p.split('\n').map(function (l) { return escHtml(l.trim()); }).join('<br>') + '</p>';
+    }).join('\n');
+  }
+  function openNote(pre) {
+    pre = pre || {};
+    if ($('note-text').value === '' || pre.text !== undefined || pre.src !== undefined) {
+      $('note-title').value = pre.title || '';
+      $('note-src').value = pre.src || '';
+      $('note-text').value = pre.text || '';
+    }
+    setNoteStatus('');
+    show('note');
+    history.pushState({ v: 'note' }, '');
+  }
+  function setNoteStatus(text, kind) {
+    var el = $('note-status');
+    el.className = 'status' + (kind ? ' ' + kind : '');
+    el.hidden = !text;
+    el.textContent = text || '';
+  }
+  async function saveNote() {
+    var text = $('note-text').value.replace(/\r\n?/g, '\n').trim();
+    if (!text) { setNoteStatus('Bitte zuerst einen Text einfügen.', 'warn'); return; }
+    if (text.length > MAX_NOTE) { setNoteStatus('Der Text ist zu lang (mehr als 2 Mio. Zeichen).', 'bad'); return; }
+    var srcRaw = $('note-src').value.trim();
+    var src = '';
+    if (srcRaw) {
+      src = extractUrl(srcRaw);
+      if (!src) { setNoteStatus('Die Quelle ist kein gültiger Link. Lass das Feld leer oder gib einen Link mit https:// an.', 'warn'); return; }
+    }
+    var id = Store.newId('a');
+    var key = src ? normalizeUrl(src) : 'text:' + id;
+    if (src) {
+      var dup = await Store.findByUrl(key);
+      if (dup) { setNoteStatus('Zu dieser Quelle gibt es schon einen Artikel: ' + dup.title + '. Ändere oder leere das Quellenfeld, um trotzdem zu speichern.', 'warn'); return; }
+    }
+    var firstLine = text.split('\n').map(function (l) { return l.trim(); }).filter(Boolean)[0] || '';
+    var title = $('note-title').value.trim() || (firstLine.length > 100 ? firstLine.slice(0, 100).replace(/\s+\S*$/, '') + ' …' : firstLine);
+    var html = noteHtml(text);
+    var plain = Sanitize.run(html, { mode: 'render' }).el.textContent;
+    var site = 'Eigener Text';
+    if (src) { try { site = new URL(src).hostname.replace(/^www\./, ''); } catch (e) { /* bleibt */ } }
+    var meta = {
+      id: id, url: key, finalUrl: key, title: title.slice(0, 300), byline: '', site: site, lang: '', dir: '', published: '',
+      excerpt: plain.slice(0, 260), savedAt: Date.now(), chars: plain.length, imageTotal: 0, imageSaved: 0, via: 'text', tags: []
+    };
+    $('note-save').disabled = true;
+    try {
+      await Store.saveArticle(meta, html, [], plain);
+    } catch (e) {
+      $('note-save').disabled = false;
+      log('Text speichern fehlgeschlagen: ' + (e && e.message));
+      setNoteStatus('Speichern fehlgeschlagen: ' + ((e && e.message) || e), 'bad');
+      return;
+    }
+    $('note-save').disabled = false;
+    log('Text gespeichert ' + id + ' (' + plain.length + ' Zeichen)');
+    addToMemory(meta, plain);
+    $('note-title').value = ''; $('note-src').value = ''; $('note-text').value = '';
+    noteSaved = id;
+    history.back();
+  }
+  var noteSaved = null;
+  $('note-open').addEventListener('click', function () { openNote(); });
+  $('note-save').addEventListener('click', saveNote);
+  $('note-cancel').addEventListener('click', function () { history.back(); });
+  $('note-back').addEventListener('click', function () { history.back(); });
+
+  /* ---------- Sicherung ---------- */
+  var BK_DAYS = 14;
+  var bkBusy = false;
+  var bkOpen = null; // { zip, manifest, plan }
+
+  function bkSet(id, text, kind) {
+    var el = $(id);
+    clear(el);
+    el.className = 'status' + (kind ? ' ' + kind : '');
+    el.hidden = !text;
+    if (text) el.appendChild(h('span', { text: text }));
+  }
+  function bkProgress(id, label) {
+    var el = $(id);
+    var bar = h('progress', { class: 'bk', max: '100', value: '0' });
+    clear(el);
+    el.className = 'status busy';
+    el.hidden = false;
+    el.appendChild(h('div', { text: label }));
+    el.appendChild(bar);
+    return function (done, total) { bar.max = total || 1; bar.value = done; };
+  }
+  function bkLock(on) {
+    bkBusy = on;
+    ['bk-create', 'bk-pick', 'bk-go', 'bk-cancel'].forEach(function (i) { $(i).disabled = on; });
+  }
+  function bkLastText() {
+    var li = Backup.lastInfo();
+    if (!li) return 'Noch kein Backup erstellt.';
+    return 'Letztes Backup: ' + fmtDate(li.at) + ' (' + li.articles + ' Artikel, ' + fmtBytes(li.size) + '). Das Teilen-Menü meldet nicht zurück, ob Du die Datei wirklich abgelegt hast – schau im Zielordner nach.';
+  }
+  function renderBackupNote() {
+    var note = $('backup-note');
+    if (!metas.length) { note.hidden = true; return; }
+    var li = Backup.lastInfo();
+    var age = li ? (Date.now() - li.at) / 86400000 : Infinity;
+    if (age < BK_DAYS) { note.hidden = true; return; }
+    clear(note);
+    note.hidden = false;
+    note.appendChild(h('span', { text: li ? 'Das letzte Backup ist ' + Math.floor(age) + ' Tage alt.' : 'Es gibt noch kein Backup.' }));
+    note.appendChild(h('button', { class: 'small', text: 'Jetzt sichern', onclick: openBackup }));
+  }
+  function openBackup() {
+    show('backup');
+    renderBackup();
+    history.pushState({ v: 'backup' }, '');
+  }
+  function renderBackup() {
+    $('bk-last').textContent = bkLastText();
+  }
+
+  $('bk-create').addEventListener('click', async function () {
+    if (bkBusy) return;
+    if (!metas.length) { bkSet('bk-status', 'Es sind noch keine Artikel gespeichert.', 'warn'); return; }
+    bkLock(true);
+    try {
+      var prog = bkProgress('bk-status', 'Backup wird erstellt …');
+      var r = await Backup.create(VERSION, prog);
+      var name = Backup.fileName();
+      log('Backup erstellt: ' + r.manifest.counts.articles + ' Artikel, ' + r.blob.size + ' Bytes');
+      // Eigene Kontrolle: die frische Datei wird wieder geöffnet und vollständig geprüft
+      var chk = await Backup.inspect(r.blob);
+      await Backup.verifyAll(chk.zip, chk.manifest);
+      var prog2 = bkProgress('bk-status', 'Datei wird übergeben …');
+      var how = await Backup.deliver(r.blob, name, prog2);
+      if (how === 'cancelled') {
+        bkSet('bk-status', 'Abgebrochen. Es wurde nichts gespeichert.', 'warn');
+      } else {
+        Backup.remember({ at: Date.now(), articles: r.manifest.counts.articles, size: r.blob.size, name: name });
+        bkSet('bk-status', how === 'share'
+          ? 'Backup «' + name + '» (' + fmtBytes(r.blob.size) + ') erstellt, geprüft und ans Teilen-Menü übergeben. Prüfe im Zielordner (z. B. OneDrive), dass die Datei dort angekommen ist.'
+          : 'Backup «' + name + '» (' + fmtBytes(r.blob.size) + ') erstellt, geprüft und heruntergeladen.', 'ok');
+        renderBackup();
+        renderBackupNote();
+      }
+    } catch (e) {
+      log('Backup fehlgeschlagen: ' + (e && e.message));
+      bkSet('bk-status', 'Backup fehlgeschlagen: ' + ((e && e.message) || e), 'bad');
+    }
+    bkLock(false);
+  });
+
+  $('bk-pick').addEventListener('click', function () {
+    if (bkBusy) return;
+    $('bk-file').value = '';
+    $('bk-file').click();
+  });
+
+  function bkReset() {
+    bkOpen = null;
+    $('bk-restore').hidden = true;
+    $('bk-go').classList.remove('confirm');
+    $('bk-go').textContent = 'Wiederherstellen';
+  }
+  $('bk-cancel').addEventListener('click', function () { bkReset(); bkSet('bk-rstatus', ''); });
+
+  function bkModeNote() {
+    var mode = document.querySelector('input[name="bk-mode"]:checked').value;
+    var pl = bkOpen && bkOpen.plan;
+    var t = '';
+    if (mode === 'merge') {
+      t = pl.add.length + ' Artikel kommen neu dazu, ' + pl.same.length + ' sind schon vorhanden (dort werden fehlende Markierungen und Schlagwörter ergänzt)'
+        + (pl.dupUrl.length ? ', ' + pl.dupUrl.length + ' mit gleicher Adresse, aber anderer Kennung werden übersprungen' : '') + '. Gelöscht wird nichts.';
+    } else {
+      t = pl.onlyLocal.length + ' Artikel, die nur hier vorhanden sind, werden gelöscht. Der Stand von ' + pl.total + ' Artikeln wird aus dem Backup übernommen. Das lässt sich nicht rückgängig machen – erstelle vorher am besten ein Backup des jetzigen Stands.';
+    }
+    $('bk-mode-note').textContent = t;
+    $('bk-go').classList.remove('confirm');
+    $('bk-go').textContent = 'Wiederherstellen';
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('input[name="bk-mode"]'), function (r) {
+    r.addEventListener('change', function () { if (bkOpen) bkModeNote(); });
+  });
+
+  $('bk-file').addEventListener('change', async function () {
+    var f = $('bk-file').files && $('bk-file').files[0];
+    if (!f) return;
+    bkReset();
+    bkLock(true);
+    try {
+      bkSet('bk-rstatus', 'Datei wird geprüft …', 'busy');
+      var ins = await Backup.inspect(f);
+      var prog = bkProgress('bk-rstatus', 'Alle Einträge werden auf Vollständigkeit geprüft …');
+      await Backup.verifyAll(ins.zip, ins.manifest, prog);
+      var pl = Backup.plan(ins.manifest, metas);
+      bkOpen = { zip: ins.zip, manifest: ins.manifest, plan: pl };
+      var m = ins.manifest;
+      var box = $('bk-summary');
+      clear(box);
+      [
+        ['Datei', f.name || '(ohne Namen)'],
+        ['Erstellt', m.createdAt ? fmtDate(Date.parse(m.createdAt)) : 'unbekannt'],
+        ['Artikel im Backup', String(m.articles.length)],
+        ['Bilder', String((m.counts && m.counts.images) || 0)],
+        ['Markierungen', String((m.counts && m.counts.highlights) || 0)],
+        ['Artikel jetzt hier', String(metas.length)]
+      ].forEach(function (r) {
+        box.appendChild(h('div', { class: 'kv' }, h('span', { class: 'k', text: r[0] }), h('span', { class: 'v', text: r[1] })));
+      });
+      $('bk-restore').hidden = false;
+      bkModeNote();
+      bkSet('bk-rstatus', 'Das Backup ist vollständig und unbeschädigt. Wähle, wie es eingespielt werden soll.', 'ok');
+    } catch (e) {
+      log('Backup lesen fehlgeschlagen: ' + (e && e.message));
+      bkSet('bk-rstatus', 'Die Datei kann nicht verwendet werden: ' + ((e && e.message) || e) + ' Es wurde nichts verändert.', 'bad');
+    }
+    bkLock(false);
+  });
+
+  $('bk-go').addEventListener('click', async function () {
+    if (bkBusy || !bkOpen) return;
+    var mode = document.querySelector('input[name="bk-mode"]:checked').value;
+    var btn = $('bk-go');
+    if (mode === 'replace' && !btn.classList.contains('confirm')) {
+      btn.classList.add('confirm');
+      btn.textContent = 'Ja, alles ersetzen';
+      return;
+    }
+    bkLock(true);
+    var o = bkOpen;
+    try {
+      var prog = bkProgress('bk-rstatus', 'Wird eingespielt …');
+      var res = await Backup.restore({ zip: o.zip, manifest: o.manifest, mode: mode, metas: metas.slice() }, prog);
+      await loadAll();
+      renderList();
+      renderBackupNote();
+      var parts = [];
+      if (res.added) parts.push(res.added + ' Artikel hinzugefügt');
+      if (res.replaced) parts.push(res.replaced + ' ersetzt');
+      if (res.merged) parts.push(res.merged + ' bestehende ergänzt');
+      if (res.highlightsAdded) parts.push(res.highlightsAdded + ' Markierungen übernommen');
+      if (res.deleted) parts.push(res.deleted + ' nur lokale Artikel gelöscht');
+      if (res.skippedUrl) parts.push(res.skippedUrl + ' wegen gleicher Adresse übersprungen');
+      if (res.missingImages) parts.push(res.missingImages + ' Bilder fehlten im Backup');
+      log('Restore ' + mode + ': ' + parts.join(', '));
+      bkReset();
+      bkSet('bk-rstatus', 'Fertig: ' + (parts.join(', ') || 'nichts zu tun') + '.', 'ok');
+    } catch (e) {
+      log('Restore fehlgeschlagen: ' + (e && e.message));
+      try { await loadAll(); renderList(); } catch (x) { /* ignorieren */ }
+      bkSet('bk-rstatus', 'Wiederherstellen unterbrochen: ' + ((e && e.message) || e) + ' Bereits eingespielte Artikel sind vollständig; beim Ersetzen wurde noch nichts gelöscht. Du kannst den Vorgang einfach nochmals starten.', 'bad');
+    }
+    bkLock(false);
+  });
+  $('backup-btn').addEventListener('click', openBackup);
+  $('backup-back').addEventListener('click', function () { history.back(); });
+
+  /* ---------- Info ---------- */
+  async function renderInfo() {
+    var st = await Store.stats();
+    var box = $('info-body');
+    clear(box);
+    var plugins = [];
+    try { plugins = Object.keys((window.Capacitor && window.Capacitor.Plugins) || {}); } catch (e) { /* leer */ }
+    var rows = [
+      ['Version', VERSION],
+      ['Läuft als App', Net.isNative() ? 'ja' : 'nein (Browser)'],
+      ['HTTP-Dienst', Net.plugin() ? 'vorhanden' : 'fehlt'],
+      ['Teilen-Plugin', sharePlugin() ? 'vorhanden' : 'fehlt'],
+      ['Readability', typeof Readability === 'function' ? 'geladen' : 'fehlt (Ersatzverfahren aktiv)'],
+      ['Highlight-API', hasApi ? 'vorhanden' : 'Ersatzdarstellung'],
+      ['Artikel', String(st.articles)],
+      ['Bilder', String(st.images)],
+      ['Markierungen', String(st.highlights)],
+      ['Schlagwörter', String(allTags().length)],
+      ['Browser-Ansicht', Net.browserAvailable() ? 'vorhanden' : 'fehlt'],
+      ['Backup-Plugins', (Net.plugin ? (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Filesystem ? 'Filesystem ja' : 'Filesystem fehlt') + ', ' + (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Share ? 'Share ja' : 'Share fehlt') : '–')],
+      ['Letztes Backup', Backup.lastInfo() ? fmtDate(Backup.lastInfo().at) : 'noch keines'],
+      ['Suchindex', Object.keys(searchItems).length + ' Artikel im Arbeitsspeicher'],
+      ['Speicher belegt', st.usage != null ? fmtBytes(st.usage) + ' von ' + fmtBytes(st.quota) : 'unbekannt']
+    ];
+    rows.forEach(function (r) {
+      box.appendChild(h('div', { class: 'kv' }, h('span', { class: 'k', text: r[0] }), h('span', { class: 'v', text: r[1] })));
+    });
+    box.appendChild(h('div', { class: 'kv' }, h('span', { class: 'k', text: 'Plugins' }), h('span', { class: 'v', text: plugins.join(', ') || '–' })));
+    $('log').textContent = logLines.length ? logLines.join('\n') : '(leer)';
+  }
+
+  /* ---------- Teilen-Menü ---------- */
+  function sharePlugin() {
+    var P = window.Capacitor && window.Capacitor.Plugins;
+    if (!P) return null;
+    if (P.CapacitorShareTarget) return P.CapacitorShareTarget;
+    var k = Object.keys(P).find(function (n) { return /share/i.test(n); });
+    return k ? P[k] : null;
+  }
+  function onShared(ev) {
+    try { log('Geteilt: ' + JSON.stringify(ev).slice(0, 400)); } catch (e) { /* ignorieren */ }
+    var text = ((ev && ev.texts) || []).join(' ') + ' ' + ((ev && ev.title) || '');
+    var u = extractUrl(text);
+    if (!u) {
+      var shared = ((ev && ev.texts) || []).join('\n\n').trim();
+      if (shared) { closeAnyView(); openNote({ text: shared, title: (ev && ev.title) || '' }); return; }
+      show('list');
+      setStatus('In dem geteilten Inhalt steckt weder ein Link noch ein Text.', 'bad');
+      return;
+    }
+    if (history.state && history.state.v) { /* Ansicht bleibt im Verlauf */ }
+    closeAnyView();
+    enqueue(u);
+  }
+  function closeAnyView() {
+    if (!views.list.hidden) return;
+    revokeUrls();
+    current = null;
+    clearPaint();
+    show('list');
+    renderList();
+  }
+  function initShare() {
+    var p = sharePlugin();
+    if (!p || typeof p.addListener !== 'function') { log('Teilen-Plugin nicht gefunden'); return; }
+    try {
+      var r = p.addListener('shareReceived', onShared);
+      if (r && r.then) r.then(function () { log('Teilen-Listener aktiv'); }, function (e) { log('Teilen-Listener Fehler: ' + (e && e.message)); });
+    } catch (e) { log('Teilen-Listener Fehler: ' + (e && e.message)); }
+  }
+
+  /* ---------- Schlagwörter im geöffneten Artikel ---------- */
+  function tagMsg(t) {
+    var el = $('tag-msg');
+    el.textContent = t || '';
+    el.hidden = !t;
+  }
+  function renderReaderTags() {
+    if (!current) return;
+    var box = $('r-tags');
+    clear(box);
+    var tags = current.meta.tags;
+    tags.forEach(function (t) {
+      box.appendChild(h('button', { class: 'tag rm', 'aria-label': 'Schlagwort ' + t + ' entfernen', onclick: function () { removeTag(t); } }, t));
+    });
+    $('tag-count').textContent = tags.length ? '(' + tags.length + ')' : '';
+    renderSuggest();
+  }
+  function renderSuggest() {
+    if (!current) return;
+    var box = $('tag-suggest');
+    clear(box);
+    var typed = foldKey($('tag-input').value);
+    var have = current.meta.tags.map(foldKey);
+    allTags().filter(function (t) { return have.indexOf(t.key) === -1 && (!typed || t.key.indexOf(typed) !== -1); })
+      .slice(0, 10)
+      .forEach(function (t) {
+        box.appendChild(h('button', { class: 'tag sug', onclick: function () { addTags(t.name); } }, '+ ' + t.name));
+      });
+  }
+  async function addTags(raw) {
+    if (!current) return;
+    var parts = String(raw).split(/[,;\n]/).map(canonicalTag).filter(Boolean);
+    if (!parts.length) { tagMsg(''); return; }
+    var m = current.meta;
+    var have = m.tags.map(foldKey);
+    var added = 0, msg = '';
+    parts.forEach(function (t) {
+      var k = foldKey(t);
+      if (have.indexOf(k) !== -1) { msg = 'Dieses Schlagwort ist schon vergeben.'; return; }
+      if (m.tags.length >= 20) { msg = 'Höchstens 20 Schlagwörter pro Artikel.'; return; }
+      m.tags.push(t);
+      have.push(k);
+      added++;
+    });
+    if (added) { await Store.putMeta(m); reindex(m.id); msg = ''; }
+    $('tag-input').value = '';
+    tagMsg(msg);
+    renderReaderTags();
+  }
+  async function removeTag(t) {
+    if (!current) return;
+    var m = current.meta;
+    var k = foldKey(t);
+    m.tags = m.tags.filter(function (x) { return foldKey(x) !== k; });
+    await Store.putMeta(m);
+    reindex(m.id);
+    tagMsg('');
+    renderReaderTags();
+  }
+  $('tag-add').addEventListener('click', function () { addTags($('tag-input').value); });
+  $('tag-input').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') { e.preventDefault(); addTags($('tag-input').value); }
+  });
+  $('tag-input').addEventListener('input', renderSuggest);
+
+  /* ---------- Schlagwörter verwalten ---------- */
+  function renderTagManage() {
+    var ul = $('tag-manage');
+    clear(ul);
+    var tags = allTags();
+    $('tag-manage-empty').hidden = tags.length > 0;
+    tags.forEach(function (t) {
+      var li = h('li', { class: 'item manage-row', 'data-key': t.key });
+      var edit = h('button', { text: 'Umbenennen' });
+      var del = h('button', { text: 'Löschen' });
+      edit.addEventListener('click', function () { startRename(li, t); });
+      twoStep(del, 'Löschen', function () { deleteTag(t.key); });
+      li.appendChild(h('div', { class: 'manage-name' }, t.name, h('span', { class: 'n', text: t.count + ' Artikel' })));
+      li.appendChild(h('div', { class: 'actions' }, edit, del));
+      ul.appendChild(li);
+    });
+  }
+  function startRename(li, t) {
+    clear(li);
+    var inp = h('input', { type: 'text', value: t.name, maxlength: '60', 'aria-label': 'Neuer Name' });
+    var ok = h('button', { class: 'primary', text: 'Speichern' });
+    var no = h('button', { text: 'Abbrechen' });
+    ok.addEventListener('click', function () { renameTag(t.key, inp.value); });
+    no.addEventListener('click', renderTagManage);
+    inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); renameTag(t.key, inp.value); } });
+    li.appendChild(h('div', { class: 'manage-edit' }, inp, ok, no));
+    inp.focus();
+  }
+  async function renameTag(oldKey, raw) {
+    var nn = cleanTag(raw);
+    if (!nn) { renderTagManage(); return; }
+    var nk = foldKey(nn);
+    var target = allTags().find(function (x) { return x.key === nk && x.key !== oldKey; });
+    if (target) nn = target.name; // Zusammenführen: Schreibweise des bestehenden Schlagworts behalten
+    var changed = [];
+    metas.forEach(function (m) {
+      var had = false, seen = {}, out = [];
+      (m.tags || []).forEach(function (t) {
+        var k = foldKey(t);
+        if (k === oldKey) { had = true; t = nn; k = nk; }
+        if (!seen[k]) { seen[k] = 1; out.push(t); }
+      });
+      if (had) { m.tags = out; changed.push(m); }
+    });
+    await Store.putMetas(changed);
+    changed.forEach(function (m) { reindex(m.id); });
+    var ft = [];
+    filter.tags.forEach(function (k) { var x = k === oldKey ? nk : k; if (ft.indexOf(x) === -1) ft.push(x); });
+    filter.tags = ft;
+    renderTagManage();
+    renderList();
+  }
+  async function deleteTag(key) {
+    var changed = [];
+    metas.forEach(function (m) {
+      var n = (m.tags || []).filter(function (t) { return foldKey(t) !== key; });
+      if (n.length !== (m.tags || []).length) { m.tags = n; changed.push(m); }
+    });
+    await Store.putMetas(changed);
+    changed.forEach(function (m) { reindex(m.id); });
+    filter.tags = filter.tags.filter(function (k) { return k !== key; });
+    renderTagManage();
+    renderList();
+  }
+
+  /* ---------- Verdrahtung ---------- */
+  $('save').addEventListener('click', function () {
+    var v = $('url').value;
+    if (!v.trim()) { setStatus('Bitte einen Link einfügen.', 'warn'); return; }
+    enqueue(v);
+  });
+  $('url').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') { e.preventDefault(); $('save').click(); }
+  });
+  $('paste').addEventListener('click', async function () {
+    try {
+      var t = await navigator.clipboard.readText();
+      if (t) $('url').value = t.trim();
+      else setStatus('Die Zwischenablage ist leer.', 'warn');
+    } catch (e) {
+      setStatus('Einfügen aus der Zwischenablage ist hier nicht erlaubt. Tippe ins Feld und halte gedrückt, dann «Einfügen» wählen.', 'warn');
+    }
+  });
+  var findTimer = null;
+  $('find').addEventListener('input', function () {
+    clearTimeout(findTimer);
+    findTimer = setTimeout(function () { filter.q = $('find').value; renderList(); }, 150);
+  });
+  $('reset-filter').addEventListener('click', function () {
+    filter = { q: '', tags: [] };
+    $('find').value = '';
+    renderList();
+  });
+  $('manage-tags').addEventListener('click', function () {
+    show('tags');
+    renderTagManage();
+    history.pushState({ v: 'tags' }, '');
+  });
+  $('tags-back').addEventListener('click', function () { history.back(); });
+  $('back').addEventListener('click', function () { history.back(); });
+  $('info-btn').addEventListener('click', function () {
+    show('info');
+    renderInfo();
+    history.pushState({ v: 'info' }, '');
+  });
+  $('info-back').addEventListener('click', function () { history.back(); });
+  $('log-copy').addEventListener('click', async function () {
+    try { await navigator.clipboard.writeText(logLines.join('\n')); $('log-copy').textContent = 'Kopiert'; }
+    catch (e) { $('log-copy').textContent = 'Kopieren nicht möglich'; }
+    setTimeout(function () { $('log-copy').textContent = 'Protokoll kopieren'; }, 2000);
+  });
+
+  window.addEventListener('popstate', function (e) {
+    var s = e.state;
+    if (s && s.v === 'reader') openArticle(s.id, false, s.q || '');
+    else if (s && s.v === 'info') { show('info'); renderInfo(); }
+    else if (s && s.v === 'tags') { show('tags'); renderTagManage(); }
+    else if (s && s.v === 'backup') { show('backup'); renderBackup(); }
+    else if (s && s.v === 'note') { show('note'); }
+    else if (!views.reader.hidden) closeReader();
+    else {
+      show('list'); renderList();
+      if (noteSaved && metaById[noteSaved]) {
+        var nid = noteSaved;
+        setStatus('Gespeichert: ' + metaById[nid].title, 'ok', { label: 'Öffnen', run: function () { openArticle(nid, true); } });
+      }
+      noteSaved = null;
+    }
+  });
+
+  /* ---------- Start ---------- */
+  (async function start() {
+    // Nach einem Neuladen startet die App immer mit der Liste; ein alter Verlaufseintrag darf nicht in die Leseansicht zurückführen
+    try { if (history.state) history.replaceState(null, ''); } catch (e) { /* ignorieren */ }
+    try {
+      await Store.open();
+      Store.persist().then(function (ok) { log('Dauerhafter Speicher: ' + (ok ? 'ja' : 'nein/unbekannt')); });
+      await backfillTexts();
+      await loadAll();
+      renderList();
+      renderBackupNote();
+      Backup.cleanup(86400000);
+    } catch (e) {
+      log('Speicher: ' + (e && e.message));
+      setStatus('Der lokale Speicher ist nicht verfügbar: ' + (e && e.message), 'bad');
+    }
+    initShare();
+    log('Start, Version ' + VERSION + ', nativ=' + Net.isNative());
+    window.__app = { enqueue: enqueue, onShared: onShared, openArticle: openArticle, log: log }; // für Tests
+  })();
+})();
+
+</script>
+</body>
+</html>
